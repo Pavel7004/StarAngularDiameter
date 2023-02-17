@@ -13,13 +13,13 @@ CXXFLAGS := $(CFLAGS) -std=c++17
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 .PHONY: all
-all: $(BUILD_DIR)/$(EXEC_NAME)
+all: $(EXEC_NAME)
 
 .PHONY: clean
 clean:
-	rm $(BUILD_DIR)/$(EXEC_NAME) $(OBJS)
+	rm $(EXEC_NAME) $(OBJS)
 
-$(BUILD_DIR)/$(EXEC_NAME): $(OBJS)
+$(EXEC_NAME): $(OBJS)
 	$(CXX) -o $@ $(CXXFLAGS) $^
 
 $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
