@@ -5,7 +5,7 @@ SRCS := main.cpp
 BUILD_DIR := ./build
 SRC_DIR := ./src
 
-CXX := clang++
+CXX := g++
 
 CFLAGS := -Wall -Wextra -Wpedantic
 CXXFLAGS := $(CFLAGS) -std=c++17
