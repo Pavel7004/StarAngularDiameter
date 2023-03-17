@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+star
 
 # Build directory
 build/*
+.ccls-cache/*
