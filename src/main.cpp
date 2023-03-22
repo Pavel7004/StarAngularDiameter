@@ -2,7 +2,7 @@
 #include <iostream>
 
 const double pi = acos(-1.0); // Число е
-const double I0 = 160;        // Интенсивность свечения
+const double I0 = 5;        // Интенсивность свечения
 const double Radius = 24.0;   // Радиус апетуры
 const double lyambda1 = 6250; // Интервал(начало) длины волны
 const double lyambda2 = 7750; // Интервал(конец) длины волны
@@ -16,34 +16,15 @@ const double t0 = 7.84e-2;  // Начальное t
 const double R0 = 2.8;      // Радиус проекции звезды
                        // на плоскость видимого диска луны
 
-/*double E0(double lyambda)   //возможно константа
-{
-    return 0;
-}
-double P(double lyambda)    //возможно константа
-{
-    return 0;
-}
-double R(double lyambda)    //возможно константа
-{
-    return 0;
-}
-double E(double lyambda) {
-  lyambda = lyambda;
-  return 1;
-}
-*/
 
 double sigma(double y) { return 2.0 * sqrt(Radius * Radius - y * y); }
 
 double S(double omega) {
-  return 2.0 / 3.0 * omega * sin(pi / 8.0 * omega * omega) +
-         omega * sin(pi / 2.0 * omega * omega) / 6.0;
+  return omega/6.0*(4*sin(pi*omega*omega/8.0)+sin(pi*omega*omega/2.0));
 }
 
 double C(double omega) {
-  return 2.0 / 3.0 * omega * cos(pi / 8.0 * omega * omega) +
-         omega * cos(pi / 2.0 * omega * omega) / 6.0;
+  return omega/6.0*(1+4*cos(pi*omega*omega/8.0)+cos(pi*omega*omega/2.0));
 }
 
 double G0(double x) {
@@ -66,24 +47,24 @@ double G1(double x) {
 
 double G2(double x) { return 8.0 * Radius * Radius * G1(x) / 3.0; }
 
-double G3(double x, double R0) { return 4.0 * R0 * R0 / 3.0 * G2(x); }
+double G3(double x) { return 4.0 * R0 * R0 / 3.0 * G2(x); }
 
-double G4(double x, double R0) { return 2.0 * R0 * R0 * G2(x); }
+double G4(double x) { return 4.0 * R0 * R0 * G2(x)/3.0; }
 
-double T1(double t, double V, double t0, double R0) {
-  return (G3(V * (t + deltat - t0), R0) - G3(V * (t - deltat - t0), R0)) / V;
+double T1(double t) {
+  return (G3(V * (t + deltat - t0)) - G3(V * (t - deltat - t0))) / V;
 }
 
-double T2(double t, double V, double t0, double R0) {
-  return (G4(V * (t + deltat - t0), R0) - G4(V * (t - deltat - t0), R0)) / V;
+double T2(double t) {
+  return (G4(V * (t + deltat - t0)) - G4(V * (t - deltat - t0))) / V;
 }
 
 double T(double t) {
-  return P1 * T1(t, V, t0, R0) + P2 * T2(t, V, t0, R0) + L0;
+  return P1 * T1(t) + P2 * T2(t) + L0;
 }
 
 int main() {
-  const size_t steps = 3'000'000;
+  const size_t steps = 30'000'000;
   double t = t0;
   double dt = deltat;
 
