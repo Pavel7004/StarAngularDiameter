@@ -1,17 +1,17 @@
 #include <cmath>
 #include <iostream>
 const double pi = acos(-1.0); // Число е
-const double I0 = 5.49;        // Интенсивность свечения ?
+const double I0 = 5.49;        // Интенсивность свечения 
 const double Radius = 24.0;   // Радиус апетуры
 const double lyambda1 = 6250; // Интервал(начало) длины волны
 const double lyambda2 = 7750; // Интервал(конец) длины волны
 const double l = 3.64825e8; // Расстояние до Луны
 const double P1 = 1.0;      // хз
 const double P2 = 0.0;      // хз
-const double L0 = 2.0;      // хз
-const double deltat = 2e-3; // Шаг данных t ???
+const double L0 = 2.0;      // Фон неба
+const double deltat = 2e-3; // Длительность одного наблюдения
 const double V = 726.0;     // Скорость центра диска луны
-const double t0 = 8e-3;  // Начальное t
+const double t0 = 8e3;  // Начальное t
 const double R0 = 2.5;      // Радиус проекции звезды
                        // на плоскость видимого диска луны
 
