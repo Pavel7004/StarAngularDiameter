@@ -7,21 +7,24 @@ SRC_DIR := ./src
 
 CXX := g++
 
-CFLAGS := -Wall -Wextra -Wpedantic -O2
+CFLAGS := -Wall -Wextra -Wpedantic 
 CXXFLAGS := $(CFLAGS) -std=c++17
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 .PHONY: all
-all: $(EXEC_NAME)
+all: $(BUILD_DIR) $(EXEC_NAME)
 
 .PHONY: plot
-plot: $(EXEC_NAME)
+plot: $(BUILD_DIR) $(EXEC_NAME)
 	gnuplot -c graph.plot	
 
 .PHONY: clean
 clean:
 	rm -f $(EXEC_NAME) $(OBJS) out.png
+
+$(BUILD_DIR):
+	mkdir build
 
 $(EXEC_NAME): $(OBJS)
 	$(CXX) -o $@ $(CXXFLAGS) $^
