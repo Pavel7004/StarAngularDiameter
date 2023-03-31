@@ -7,7 +7,7 @@ SRC_DIR := ./src
 
 CXX := g++
 
-CFLAGS := -Wall -Wextra -Wpedantic 
+CFLAGS := -Wall -Wextra -Wpedantic -O2
 CXXFLAGS := $(CFLAGS) -std=c++17
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
@@ -18,6 +18,10 @@ all: $(BUILD_DIR) $(EXEC_NAME)
 .PHONY: plot
 plot: $(BUILD_DIR) $(EXEC_NAME)
 	gnuplot -c graph.plot	
+
+.PHONY: dots
+dots: $(BUILD_DIR) $(EXEC_NAME)
+	gnuplot -c dots.plot	
 
 .PHONY: clean
 clean:
