@@ -16,3 +16,5 @@ $ make
 
 ![График](./misc/line.png)
 
+![График(точки)](./misc/dots.png)
+

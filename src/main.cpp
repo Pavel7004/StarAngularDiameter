@@ -15,7 +15,7 @@ constexpr double L0       = 2.0;         // Фон неба
 constexpr double deltat   = 2e-3;        // Шаг данных t (с)
 constexpr double V        = 700.0;       // Скорость центра диска луны (м/с)
 constexpr double t0       = 80e3;        // Начальное t (с)
-constexpr double tN       = 2.0;         // Время проведения измерений (с)
+constexpr double tN       = 0.20;         // Время проведения измерений (с)
 constexpr double R0       = 2.5;         // Радиус проекции звезды на плоскость видимого диска луны (м)
 
 // clang-format on
