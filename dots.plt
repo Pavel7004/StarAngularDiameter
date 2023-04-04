@@ -1,4 +1,5 @@
 set terminal png
 set output 'out.png'
-unset xtics
-plot "< ./star" u 1:2 t "impulces per second"
+set xlabel "x, m"
+set ylabel "N/s"
+plot "< ./star" u 1:2 t "Impulces per second"

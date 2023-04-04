@@ -9,13 +9,13 @@ constexpr double R        = 0.24;        // Радиус апетуры (м)
 constexpr double lambda1  = 6250;        // Интервал(начало) длины волны (м)
 constexpr double lambda2  = 7750;        // Интервал(конец) длины волны (м)
 constexpr double l        = 3.64825e8;   // Расстояние до Луны (c)
-constexpr double P1       = 1.0;         // хз
-constexpr double P2       = 0.0;         // хз
+constexpr double P1       = 0.0;         // хз
+constexpr double P2       = 1.0;         // хз
 constexpr double L0       = 2.0;         // Фон неба
 constexpr double deltat   = 2e-3;        // Шаг данных t (с)
 constexpr double V        = 700.0;       // Скорость центра диска луны (м/с)
-constexpr double t0       = 80e3;        // Начальное t (с)
-constexpr double tN       = 2.0;         // Время проведения измерений (с)
+constexpr double t0       = 80e-3;       // Время пересечения центра диска луны (с)
+constexpr double tN       = 180e-3;      // Время наблюдений (с)
 constexpr double R0       = 2.5;         // Радиус проекции звезды на плоскость видимого диска луны (м)
 
 // clang-format on
@@ -31,11 +31,13 @@ inline double simpson(const std::function<double(const double &)> &f,
 inline double sigma(const double &y) { return 2.0 * sqrt(R * R - y * y); }
 
 inline double S(const double &omega) {
-  return simpson([](const double &t) { return sin(pi * t * t / 2.0); }, 0.0, omega);
+  return simpson([](const double &t) { return sin(pi * t * t / 2.0); }, 0.0,
+                 omega);
 }
 
 inline double C(const double &omega) {
-  return simpson([](const double &t) { return cos(pi * t * t / 2.0); }, 0.0, omega);
+  return simpson([](const double &t) { return cos(pi * t * t / 2.0); }, 0.0,
+                 omega);
 }
 
 inline double G0(const double &x) {
@@ -85,11 +87,12 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
-  auto t = t0;
+  double t = 0;
 
-  while (t < t0 + tN) {
-    printf("%.10e %.10e\n", t, T(t));
-    t += 2.0 * deltat;
+  while (t < tN) {
+    printf("%.10e %.10e\n", -V * (t0 - t), T(t));
+
+    t += deltat;
   }
 
   return EXIT_SUCCESS;
