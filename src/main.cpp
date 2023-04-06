@@ -87,7 +87,7 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
-  for (double t = 0.0; t < tN; t += deltat) {
+  for (double t = 0.0; t < tN; t += 2*deltat) {
     printf("%.10e %.10e\n", V * (t - t0), T(t));
   }
 
