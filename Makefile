@@ -7,7 +7,7 @@ SRC_DIR := ./src
 
 CXX := g++
 
-CFLAGS := -Wall -Wextra -Wpedantic -O2
+CFLAGS := -Wall -Wextra -Wpedantic
 CXXFLAGS := $(CFLAGS) -std=c++17
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)

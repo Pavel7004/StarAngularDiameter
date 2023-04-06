@@ -4,26 +4,26 @@
 
 // clang-format off
 
-constexpr double I0       = 5.499;       // Интенсивность свечения (имп / с)
-constexpr double R        = 0.24;        // Радиус апетуры (м)
-constexpr double lambda1  = 6250;        // Интервал(начало) длины волны (м)
-constexpr double lambda2  = 7750;        // Интервал(конец) длины волны (м)
-constexpr double l        = 3.64825e8;   // Расстояние до Луны (c)
-constexpr double P1       = 0.0;         // хз
-constexpr double P2       = 1.0;         // хз
-constexpr double L0       = 2.0;         // Фон неба
-constexpr double deltat   = 2e-3;        // Шаг данных t (с)
-constexpr double V        = 700.0;       // Скорость центра диска луны (м/с)
-constexpr double t0       = 80e-3;       // Время пересечения центра диска луны (с)
-constexpr double tN       = 180e-3;      // Время наблюдений (с)
-constexpr double R0       = 2.5;         // Радиус проекции звезды на плоскость видимого диска луны (м)
+constexpr double I0       = 4.509;         // Интенсивность свечения (Вт/м^2)
+constexpr double R        = 0.24;          // Радиус апетуры (м)
+constexpr double lambda1  = 6250e-10;      // Интервал(начало) длины волны (м)
+constexpr double lambda2  = 7750e-10;      // Интервал(конец) длины волны (м)
+constexpr double l        = 3.64825e8;     // Расстояние до Луны (м)
+constexpr double P1       = 1.0;           // Распределение яркости по диску звезды
+constexpr double P2       = 0.0;           // --//--
+constexpr double L0       = 2.0;           // Фон неба
+constexpr double deltat   = 2e-3;          // Шаг данных t (с)
+constexpr double V        = 726.0;         // Скорость центра диска луны (м/с)
+constexpr double t0       = 78.4e-3;       // Время пересечения центра диска луны (с)
+constexpr double tN       = 180e-3;        // Время наблюдений (с)
+constexpr double R0       = 2.8;           // Радиус проекции звезды на плоскость видимого диска луны (м)
 
 // clang-format on
 
-constexpr double pi = 3.14159; // Число е
+const double pi = std::acos(-1); // Число е
 
-inline double simpson(const std::function<double(const double &)> &f,
-                      const double &from, const double &to) {
+double simpson(const std::function<double(const double &)> &f,
+               const double &from, const double &to) {
   const auto middle = from + (to - from) / 2.0;
   return (to - from) / 6.0 * (f(from) + 4 * f(middle) + f(to));
 }
@@ -87,12 +87,8 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
-  double t = 0;
-
-  while (t < tN) {
-    printf("%.10e %.10e\n", -V * (t0 - t), T(t));
-
-    t += deltat;
+  for (double t = 0.0; t < tN; t += deltat) {
+    printf("%.10e %.10e\n", V * (t - t0), T(t));
   }
 
   return EXIT_SUCCESS;
