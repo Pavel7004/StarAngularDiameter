@@ -17,11 +17,11 @@ all: $(BUILD_DIR) $(EXEC_NAME)
 
 .PHONY: plot
 plot: $(BUILD_DIR) $(EXEC_NAME)
-	gnuplot -c graph.plt	
+	gnuplot -c graph.gp	
 
 .PHONY: dots
 dots: $(BUILD_DIR) $(EXEC_NAME)
-	gnuplot -c dots.plt	
+	gnuplot -c dots.gp
 
 .PHONY: clean
 clean:
