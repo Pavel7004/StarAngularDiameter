@@ -35,5 +35,6 @@ star
 # Build directory
 build/*
 .ccls-cache/*
+.cache/*
 
 out.png
