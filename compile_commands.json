@@ -1,0 +1,19 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-O2",
+      "-std=c++20",
+      "-c",
+      "-o",
+      "build/main.cpp.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/pavel/Projects/StarAngularDiameter",
+    "file": "/home/pavel/Projects/StarAngularDiameter/src/main.cpp",
+    "output": "/home/pavel/Projects/StarAngularDiameter/build/main.cpp.o"
+  }
+]
