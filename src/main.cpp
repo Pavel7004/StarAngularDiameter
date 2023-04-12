@@ -103,7 +103,6 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
-  #pragma GCC unroll 100
   for (double t = tN; t > 0; t -= 2 * deltat) {
     printf("%.10e %.10e\n", V * (t0 - t), T(t));
   }
