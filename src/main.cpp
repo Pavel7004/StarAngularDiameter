@@ -1,6 +1,7 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <numbers>
 
 // clang-format off
 
@@ -20,12 +21,27 @@ constexpr double R0       = 2.8;           // Радиус проекции зв
 
 // clang-format on
 
-const double pi = std::acos(-1); // Число е
+using std::cos;
+using std::sin;
+using std::sqrt;
+using std::numbers::pi; // Число е
 
 double simpson(const std::function<double(const double &)> &f,
                const double &from, const double &to) {
-  const auto middle = from + (to - from) / 2.0;
-  return (to - from) / 6.0 * (f(from) + 4 * f(middle) + f(to));
+  constexpr std::size_t parts = 30;
+  const double width = (to - from) / parts;
+
+  double res = 0.0;
+
+#pragma GCC unroll parts
+  for (std::size_t step = 0; step < parts; ++step) {
+    const double x1 = from + step * width;
+    const double x2 = from + (step + 1) * width;
+
+    res += (x2 - x1) / 6.0 * (f(x1) + 4.0 * f(0.5 * (x1 + x2)) + f(x2));
+  }
+
+  return res;
 }
 
 inline double sigma(const double &y) { return 2.0 * sqrt(R * R - y * y); }
@@ -87,8 +103,9 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
-  for (double t = 0.0; t < tN; t += 2*deltat) {
-    printf("%.10e %.10e\n", V * (t - t0), T(t));
+  #pragma GCC unroll 100
+  for (double t = tN; t > 0; t -= 2 * deltat) {
+    printf("%.10e %.10e\n", V * (t0 - t), T(t));
   }
 
   return EXIT_SUCCESS;
