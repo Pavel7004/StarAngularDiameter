@@ -2,6 +2,7 @@
 #include <functional>
 #include <iostream>
 #include <numbers>
+#include <unordered_map>
 
 // clang-format off
 
@@ -26,9 +27,11 @@ using std::sin;
 using std::sqrt;
 using std::numbers::pi; // Число е
 
-double simpson(const std::function<double(const double &)> &f,
-               const double &from, const double &to) {
-  constexpr std::size_t parts = 30;
+std::unordered_map<double, double> cacheS, cacheC;
+
+static double simpson(const std::function<double(const double &)> &f,
+                      const double &from, const double &to) {
+  constexpr std::size_t parts = 32;
   const double width = (to - from) / parts;
 
   double res = 0.0;
@@ -47,13 +50,27 @@ double simpson(const std::function<double(const double &)> &f,
 inline double sigma(const double &y) { return 2.0 * sqrt(R * R - y * y); }
 
 inline double S(const double &omega) {
-  return simpson([](const double &t) { return sin(pi * t * t / 2.0); }, 0.0,
-                 omega);
+  double res;
+  if (!cacheS.contains(omega)) {
+    res = simpson([](const double &t) { return sin(pi * t * t / 2.0); }, 0.0,
+                  omega);
+    cacheS.emplace(omega, res);
+  } else {
+    res = cacheS.at(omega);
+  }
+  return res;
 }
 
 inline double C(const double &omega) {
-  return simpson([](const double &t) { return cos(pi * t * t / 2.0); }, 0.0,
-                 omega);
+  double res;
+  if (!cacheC.contains(omega)) {
+    res = simpson([](const double &t) { return cos(pi * t * t / 2.0); }, 0.0,
+                  omega);
+    cacheC.emplace(omega, res);
+  } else {
+    res = cacheC.at(omega);
+  }
+  return res;
 }
 
 inline double G0(const double &x) {
@@ -103,6 +120,10 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
+  cacheC.reserve(100);
+  cacheS.reserve(100);
+
+#pragma GCC unroll((std::size_t)(tN / (2 * deltat)))
   for (double t = tN; t > 0; t -= 2 * deltat) {
     printf("%.10e %.10e\n", V * (t0 - t), T(t));
   }
