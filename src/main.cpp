@@ -27,16 +27,15 @@ using std::sin;
 using std::sqrt;
 using std::numbers::pi; // Число е
 
-std::unordered_map<double, double> cacheS, cacheC;
+std::unordered_map<double, double> cacheS, cacheC, cacheG0, cacheG1;
+std::size_t hitsS = 0, hitsC = 0, hitsG0 = 0, hitsG1 = 0;
 
+template <std::size_t parts = 32>
 static double simpson(const std::function<double(const double &)> &f,
                       const double &from, const double &to) {
-  constexpr std::size_t parts = 32;
   const double width = (to - from) / parts;
 
   double res = 0.0;
-
-#pragma GCC unroll parts
   for (std::size_t step = 0; step < parts; ++step) {
     const double x1 = from + step * width;
     const double x2 = from + (step + 1) * width;
@@ -56,6 +55,7 @@ inline double S(const double &omega) {
                   omega);
     cacheS.emplace(omega, res);
   } else {
+    ++hitsS;
     res = cacheS.at(omega);
   }
   return res;
@@ -68,29 +68,48 @@ inline double C(const double &omega) {
                   omega);
     cacheC.emplace(omega, res);
   } else {
+    ++hitsC;
     res = cacheC.at(omega);
   }
   return res;
 }
 
 inline double G0(const double &x) {
-  return I0 / 8.0 *
-         (2.0 * x + 4.0 * x * C(x) - 4.0 / pi * sin(pi * x * x / 2.0) +
-          4.0 * x * S(x) + 4.0 / pi * cos(pi * x * x / 2.0) +
-          4.0 * x * C(x) * C(x) - 8.0 / pi * sin(pi * x * x / 2.0) * C(x) +
-          4.0 * x * S(x) * S(x) + 8.0 / pi * cos(pi * x * x / 2.0) * S(x));
+  double res;
+  if (!cacheG0.contains(x)) {
+    const double c = C(x), s = S(x);
+    res = I0 / 8.0 *
+          (2.0 * x + 4.0 * x * c - 4.0 / pi * sin(pi * x * x / 2.0) +
+           4.0 * x * s + 4.0 / pi * cos(pi * x * x / 2.0) + 4.0 * x * c * c -
+           8.0 / pi * sin(pi * x * x / 2.0) * c + 4.0 * x * s * s +
+           8.0 / pi * cos(pi * x * x / 2.0) * s);
+    cacheG0.emplace(x, res);
+  } else {
+    ++hitsG0;
+    res = cacheG0.at(x);
+  }
+  return res;
 }
 
 inline double G1(const double &x) {
-  return simpson(
-      [&x](const double &lambda) {
-        return sqrt(lambda * l / 2.0) * G0(x * sqrt(2.0 / (l * lambda)));
-      },
-      lambda1, lambda2);
+  double res;
+  if (!cacheG1.contains(x)) {
+    res = simpson<60>(
+        [&x](const double &lambda) {
+          return sqrt(lambda * l / 2.0) * G0(x * sqrt(2.0 / (l * lambda)));
+        },
+        lambda1, lambda2);
+    cacheG1.emplace(x, res);
+  } else {
+    ++hitsG1;
+    res = cacheG1.at(x);
+  }
+  return res;
 }
 
 inline double G2(const double &x) {
-  return simpson([&x](const double &y) { return sigma(y) * G1(x + y); }, -R, R);
+  return simpson<60>([&x](const double &y) { return sigma(y) * G1(x + y); }, -R,
+                     R);
 }
 
 inline double G3(const double &x) {
@@ -120,13 +139,19 @@ inline double T2(const double &t) {
 inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
 
 int main(void) {
-  cacheC.reserve(100);
-  cacheS.reserve(100);
+  cacheG0.reserve(14'400'000);
+  cacheG1.reserve(500'000);
+
+  const double maxT = T(t0 + 50.0 / V), minT = T(t0 - 40.0 / V);
 
 #pragma GCC unroll((std::size_t)(tN / (2 * deltat)))
   for (double t = tN; t > 0; t -= 2 * deltat) {
-    printf("%.10e %.10e\n", V * (t0 - t), T(t));
+    printf("%.10e %.10e\n", V * (t0 - t), (T(t) - minT) / (maxT - minT));
   }
+
+  fprintf(stderr,
+          "Number of hits: C(x) - %lu, S(x) - %lu, G0(x) - %lu, G1 - %lu.\n",
+          hitsS, hitsC, hitsG0, hitsG1);
 
   return EXIT_SUCCESS;
 }
