@@ -5,7 +5,7 @@
       "-Wall",
       "-Wextra",
       "-Wpedantic",
-      "-O2",
+      "-O3",
       "-std=c++20",
       "-c",
       "-o",
@@ -15,5 +15,39 @@
     "directory": "/home/pavel/Projects/StarAngularDiameter",
     "file": "/home/pavel/Projects/StarAngularDiameter/src/main.cpp",
     "output": "/home/pavel/Projects/StarAngularDiameter/build/main.cpp.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-O3",
+      "-std=c++20",
+      "-c",
+      "-o",
+      "build/theory.cpp.o",
+      "src/theory.cpp"
+    ],
+    "directory": "/home/pavel/Projects/StarAngularDiameter",
+    "file": "/home/pavel/Projects/StarAngularDiameter/src/theory.cpp",
+    "output": "/home/pavel/Projects/StarAngularDiameter/build/theory.cpp.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-O3",
+      "-std=c++20",
+      "-c",
+      "-o",
+      "build/cache.cpp.o",
+      "src/cache.cpp"
+    ],
+    "directory": "/home/pavel/Projects/StarAngularDiameter",
+    "file": "/home/pavel/Projects/StarAngularDiameter/src/cache.cpp",
+    "output": "/home/pavel/Projects/StarAngularDiameter/build/cache.cpp.o"
   }
 ]
