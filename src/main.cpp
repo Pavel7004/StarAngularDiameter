@@ -1,157 +1,19 @@
-#include <cmath>
-#include <functional>
+#include "constants.h"
+#include "theory.h"
 #include <iostream>
-#include <numbers>
-#include <unordered_map>
-
-// clang-format off
-
-constexpr double I0       = 4.509;         // Интенсивность свечения (Вт/м^2)
-constexpr double R        = 0.24;          // Радиус апетуры (м)
-constexpr double lambda1  = 6250e-10;      // Интервал(начало) длины волны (м)
-constexpr double lambda2  = 7750e-10;      // Интервал(конец) длины волны (м)
-constexpr double l        = 3.64825e8;     // Расстояние до Луны (м)
-constexpr double P1       = 1.0;           // Распределение яркости по диску звезды
-constexpr double P2       = 0.0;           // --//--
-constexpr double L0       = 2.0;           // Фон неба
-constexpr double deltat   = 2e-3;          // Шаг данных t (с)
-constexpr double V        = 726.0;         // Скорость центра диска луны (м/с)
-constexpr double t0       = 78.4e-3;       // Время пересечения центра диска луны (с)
-constexpr double tN       = 180e-3;        // Время наблюдений (с)
-constexpr double R0       = 2.8;           // Радиус проекции звезды на плоскость видимого диска луны (м)
-
-// clang-format on
-
-using std::cos;
-using std::sin;
-using std::sqrt;
-using std::numbers::pi; // Число е
-
-std::unordered_map<double, double> cacheS, cacheC, cacheG0, cacheG1;
-std::size_t hitsS = 0, hitsC = 0, hitsG0 = 0, hitsG1 = 0;
-
-template <std::size_t parts = 32>
-static double simpson(const std::function<double(const double &)> &f,
-                      const double &from, const double &to) {
-  const double width = (to - from) / parts;
-
-  double res = 0.0;
-  for (std::size_t step = 0; step < parts; ++step) {
-    const double x1 = from + step * width;
-    const double x2 = from + (step + 1) * width;
-
-    res += (x2 - x1) / 6.0 * (f(x1) + 4.0 * f(0.5 * (x1 + x2)) + f(x2));
-  }
-
-  return res;
-}
-
-inline double sigma(const double &y) { return 2.0 * sqrt(R * R - y * y); }
-
-inline double S(const double &omega) {
-  double res;
-  if (!cacheS.contains(omega)) {
-    res = simpson([](const double &t) { return sin(pi * t * t / 2.0); }, 0.0,
-                  omega);
-    cacheS.emplace(omega, res);
-  } else {
-    ++hitsS;
-    res = cacheS.at(omega);
-  }
-  return res;
-}
-
-inline double C(const double &omega) {
-  double res;
-  if (!cacheC.contains(omega)) {
-    res = simpson([](const double &t) { return cos(pi * t * t / 2.0); }, 0.0,
-                  omega);
-    cacheC.emplace(omega, res);
-  } else {
-    ++hitsC;
-    res = cacheC.at(omega);
-  }
-  return res;
-}
-
-inline double G0(const double &x) {
-  double res;
-  if (!cacheG0.contains(x)) {
-    const double c = C(x), s = S(x);
-    res = I0 / 8.0 *
-          (2.0 * x + 4.0 * x * c - 4.0 / pi * sin(pi * x * x / 2.0) +
-           4.0 * x * s + 4.0 / pi * cos(pi * x * x / 2.0) + 4.0 * x * c * c -
-           8.0 / pi * sin(pi * x * x / 2.0) * c + 4.0 * x * s * s +
-           8.0 / pi * cos(pi * x * x / 2.0) * s);
-    cacheG0.emplace(x, res);
-  } else {
-    ++hitsG0;
-    res = cacheG0.at(x);
-  }
-  return res;
-}
-
-inline double G1(const double &x) {
-  double res;
-  if (!cacheG1.contains(x)) {
-    res = simpson<60>(
-        [&x](const double &lambda) {
-          return sqrt(lambda * l / 2.0) * G0(x * sqrt(2.0 / (l * lambda)));
-        },
-        lambda1, lambda2);
-    cacheG1.emplace(x, res);
-  } else {
-    ++hitsG1;
-    res = cacheG1.at(x);
-  }
-  return res;
-}
-
-inline double G2(const double &x) {
-  return simpson<60>([&x](const double &y) { return sigma(y) * G1(x + y); }, -R,
-                     R);
-}
-
-inline double G3(const double &x) {
-  return simpson(
-      [&x](const double &beta) {
-        return sqrt(R0 * R0 - beta * beta) * G2(x + beta);
-      },
-      -R0, R0);
-}
-
-inline double G4(const double &x) {
-  return simpson(
-      [&x](const double &beta) {
-        return (R0 * R0 - beta * beta) / R0 * G2(x + beta);
-      },
-      -R0, R0);
-}
-
-inline double T1(const double &t) {
-  return (G3(V * (t + deltat - t0)) - G3(V * (t - deltat - t0))) / V;
-}
-
-inline double T2(const double &t) {
-  return (G4(V * (t + deltat - t0)) - G4(V * (t - deltat - t0))) / V;
-}
-
-inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
+#include <thread>
 
 int main(void) {
-  cacheG0.reserve(14'400'000);
-  cacheG1.reserve(500'000);
-
-  const double maxT = T(t0 + 50.0 / V), minT = T(t0 - 40.0 / V);
-
-#pragma GCC unroll((std::size_t)(tN / (2 * deltat)))
-  for (double t = tN; t > 0; t -= 2 * deltat) {
-    printf("%.10e %.10e\n", V * (t0 - t), (T(t) - minT) / (maxT - minT));
+  std::size_t proc_count = std::thread::hardware_concurrency();
+  if (proc_count > 16) {
+    proc_count = 16;
+  } else {
+    proc_count /= 2;
   }
-
-  fprintf(stderr,
-          "Number of hits: C(x) - %lu, S(x) - %lu, G0(x) - %lu, G1 - %lu.\n",
-          hitsS, hitsC, hitsG0, hitsG1);
+  
+  for (const auto &[x, y] : GetData(0, tN, proc_count)) {
+    printf("%.15e %.15e\n", x, y);
+  }
 
   return EXIT_SUCCESS;
 }
