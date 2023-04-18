@@ -1,13 +1,14 @@
 EXEC_NAME := star
+DATA_FILE := data.txt
 
-SRCS := main.cpp
+SRCS := main.cpp theory.cpp cache.cpp
 
 BUILD_DIR := ./build
 SRC_DIR := ./src
 
 CXX := g++
 
-CFLAGS := -Wall -Wextra -Wpedantic -O4
+CFLAGS := -Wall -Wextra -Wpedantic -O3
 CXXFLAGS := $(CFLAGS) -std=c++20
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
@@ -16,19 +17,18 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 all: $(BUILD_DIR) $(EXEC_NAME)
 
 .PHONY: plot
-plot: $(BUILD_DIR) $(EXEC_NAME)
-	gnuplot -c graph.gp	
-
-.PHONY: dots
-dots: $(BUILD_DIR) $(EXEC_NAME)
-	gnuplot -c dots.gp
+plot: $(BUILD_DIR) $(EXEC_NAME) $(DATA_FILE)
+	cat $(DATA_FILE) | gnuplot -c graph.gp
 
 .PHONY: clean
 clean:
-	rm -f $(EXEC_NAME) $(OBJS) out.png
+	rm -f $(EXEC_NAME) $(OBJS) $(DATA_FILE) out.png
+
+$(DATA_FILE): $(EXEC_NAME)
+	./$(EXEC_NAME) > $@ 	
 
 $(BUILD_DIR):
-	mkdir build
+	mkdir $(BUILD_DIR)
 
 $(EXEC_NAME): $(OBJS)
 	$(CXX) -o $@ $(CXXFLAGS) $^
