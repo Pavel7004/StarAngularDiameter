@@ -7,7 +7,7 @@
 #include <vector>
 
 class Cache {
-  using val_func = std::function<double(const double &)>;
+  using val_func = std::function<double(const double&)>;
   using map = absl::flat_hash_map<double, double>;
 
   struct func {
@@ -17,31 +17,32 @@ class Cache {
     explicit func(val_func f) noexcept : cache(), f(std::move(f)) {
       cache.reserve(4'500'000);
     }
+
     ~func() noexcept = default;
 
-    func(const func &) = default;
-    func(func &&) = default;
+    func(const func&) = default;
+    func(func&&) = default;
 
-    func &operator=(const func &) noexcept = default;
-    func &operator=(func &&fn) noexcept = default;
+    func& operator=(const func&) noexcept = default;
+    func& operator=(func&&) noexcept = default;
   };
 
-public:
+ public:
   explicit Cache() noexcept = default;
   ~Cache() noexcept = default;
 
-  Cache(const Cache &) = delete;
-  explicit Cache(Cache &&cache) noexcept = default;
+  Cache(const Cache&) = delete;
+  explicit Cache(Cache&& cache) noexcept = default;
 
-  Cache &operator=(const Cache &) = delete;
-  Cache &operator=(Cache &&) = default;
+  Cache& operator=(const Cache&) = delete;
+  Cache& operator=(Cache&&) = default;
 
-  std::size_t RegisterFunction(const val_func &f) noexcept;
+  std::size_t RegisterFunction(const val_func& f) noexcept;
 
-  double GetFunctionValue(const std::size_t &id, const double &x) noexcept;
+  double GetFunctionValue(const std::size_t& id, const double& x) noexcept;
 
-private:
+ private:
   std::vector<func> funcs;
 };
 
-#endif // __STAR_CACHE__
+#endif  // __STAR_CACHE__

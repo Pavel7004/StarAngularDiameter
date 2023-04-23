@@ -19,4 +19,4 @@ extern const double R0;       // Радиус проекции звезды на
 
 // clang-format on
 
-#endif // __STAR_CONSTANTS__
+#endif  // __STAR_CONSTANTS__

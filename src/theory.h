@@ -5,6 +5,7 @@
 
 using datavec = std::vector<std::pair<double, double>>;
 
-datavec GetData(const double &from, const double &to, const std::size_t &thread_count);
+datavec GetData(const double& from, const double& to,
+                const std::size_t& thread_count);
 
-#endif // __STAR_THEORY__
+#endif  // __STAR_THEORY__

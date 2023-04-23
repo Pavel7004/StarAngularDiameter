@@ -1,25 +1,24 @@
 #include "theory.h"
-#include "cache.h"
-#include "constants.h"
 #include <cmath>
 #include <functional>
 #include <future>
+#include <numbers>
+#include "cache.h"
+#include "constants.h"
 
 namespace {
-
-#include <numbers>
 
 using std::cos;
 using std::sin;
 using std::sqrt;
-using std::numbers::pi; // Число е
+using std::numbers::pi;  // Число е
 
-thread_local Cache cache;
+thread_local ABSL_CONST_INIT Cache cache;
 thread_local std::size_t id_G0, id_G1, id_G2, id_G3, id_G4;
 
 template <std::size_t parts = 36>
-double simpson(const std::function<double(const double &)> &f,
-               const double &from, const double &to) {
+double simpson(const std::function<double(const double&)>& f,
+               const double& from, const double& to) {
   const double width = (to - from) / parts;
 
   double res = 0.0;
@@ -33,19 +32,23 @@ double simpson(const std::function<double(const double &)> &f,
   return res;
 }
 
-inline double sigma(const double &y) { return 2.0 * sqrt(R * R - y * y); }
-
-inline double S(const double &omega) {
-  return simpson([](const double &t) { return sin(pi * t * t / 2.0); }, 0.0,
-                 omega);
+inline double sigma(const double& y) {
+  return 2.0 * sqrt(R * R - y * y);
 }
 
-inline double C(const double &omega) {
-  return simpson([](const double &t) { return cos(pi * t * t / 2.0); }, 0.0,
-                 omega);
+inline double S(const double& omega) {
+  return simpson(
+      [](const double& t) -> double { return sin(pi * t * t / 2.0); }, 0.0,
+      omega);
 }
 
-inline double G0(const double &x) {
+inline double C(const double& omega) {
+  return simpson(
+      [](const double& t) -> double { return cos(pi * t * t / 2.0); }, 0.0,
+      omega);
+}
+
+inline double G0(const double& x) {
   const double c = C(x), s = S(x);
   return I0 / 8.0 *
          (2.0 * x + 4.0 * x * c - 4.0 / pi * sin(pi * x * x / 2.0) +
@@ -54,61 +57,61 @@ inline double G0(const double &x) {
           8.0 / pi * cos(pi * x * x / 2.0) * s);
 }
 
-inline double G1(const double &x) {
+inline double G1(const double& x) {
   return simpson<60>(
-      [&x](const double &lambda) {
+      [&x](const double& lambda) -> double {
         return sqrt(lambda * l / 2.0) *
                cache.GetFunctionValue(id_G0, x * sqrt(2.0 / (l * lambda)));
       },
       lambda1, lambda2);
 }
 
-inline double G2(const double &x) {
+inline double G2(const double& x) {
   return simpson<60>(
-      [&x](const double &y) {
+      [&x](const double& y) -> double {
         return sigma(y) * cache.GetFunctionValue(id_G1, x + y);
       },
       -R, R);
 }
 
-inline double G3(const double &x) {
+inline double G3(const double& x) {
   return simpson<60>(
-      [&x](const double &beta) {
+      [&x](const double& beta) -> double {
         return sqrt(R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_G2, x + beta);
       },
       -R0, R0);
 }
 
-inline double G4(const double &x) {
+inline double G4(const double& x) {
   return simpson<60>(
-      [&x](const double &beta) {
+      [&x](const double& beta) -> double {
         return (R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_G2, x + beta);
       },
       -R0, R0);
 }
 
-inline double T1(const double &t) {
+inline double T1(const double& t) {
   return (cache.GetFunctionValue(id_G3, V * (t + deltat - t0)) -
           cache.GetFunctionValue(id_G3, V * (t - deltat - t0))) /
          V;
 }
 
-inline double T2(const double &t) {
+inline double T2(const double& t) {
   return (cache.GetFunctionValue(id_G4, V * (t + deltat - t0)) -
           cache.GetFunctionValue(id_G4, V * (t - deltat - t0))) /
          V;
 }
 
-inline double T(const double &t) { return P1 * T1(t) + P2 * T2(t) + L0; }
+inline double T(const double& t) {
+  return P1 * T1(t) + P2 * T2(t) + L0;
+}
 
-} // namespace
+}  // namespace
 
 datavec getData(const double from, const double to) {
   // const double maxT = T(t0 + 50.0 / V), minT = T(t0 - 40.0 / V);
-  cache = Cache();
-
   id_G0 = cache.RegisterFunction(G0);
   id_G1 = cache.RegisterFunction(G1);
   id_G2 = cache.RegisterFunction(G2);
@@ -129,8 +132,8 @@ datavec getData(const double from, const double to) {
   return data;
 }
 
-datavec GetData(const double &from, const double &to,
-                const std::size_t &thread_count) {
+datavec GetData(const double& from, const double& to,
+                const std::size_t& thread_count) {
   const double width = (to - from) / static_cast<double>(thread_count);
 
   std::vector<std::future<datavec>> results;
@@ -144,15 +147,16 @@ datavec GetData(const double &from, const double &to,
 
   datavec ret = results[0].get();
   std::reverse(ret.begin(), ret.end());
+  ret.reserve(ret.size() * thread_count);
+  results.erase(results.begin());
 
-  for (std::size_t i = 1; i < results.size(); ++i) {
-    datavec tmp = results[i].get();
+  for (auto& res : results) {
+    datavec tmp = res.get();
 
-    ret.reserve(ret.size() + tmp.size());
     ret.insert(ret.end(), tmp.rbegin(), tmp.rend());
   }
 
-  std::stable_sort(ret.begin(), ret.end(), [](auto &left, auto &right) {
+  std::stable_sort(ret.begin(), ret.end(), [](auto& left, auto& right) -> bool {
     return left.first < right.first;
   });
 
