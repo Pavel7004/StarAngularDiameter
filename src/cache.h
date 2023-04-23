@@ -10,21 +10,21 @@ class Cache {
   using val_func = std::function<double(const double&)>;
   using map = absl::flat_hash_map<double, double>;
 
-  struct func {
+  struct Func {
     map cache;
     val_func f;
 
-    explicit func(val_func f) noexcept : cache(), f(std::move(f)) {
+    explicit Func(val_func f) noexcept : f(std::move(f)) {
       cache.reserve(4'500'000);
     }
 
-    ~func() noexcept = default;
+    ~Func() noexcept = default;
 
-    func(const func&) = default;
-    func(func&&) = default;
+    Func(const Func&) = default;
+    Func(Func&&) = default;
 
-    func& operator=(const func&) noexcept = default;
-    func& operator=(func&&) noexcept = default;
+    Func& operator=(const Func&) noexcept = default;
+    Func& operator=(Func&&) noexcept = default;
   };
 
  public:
@@ -32,7 +32,7 @@ class Cache {
   ~Cache() noexcept = default;
 
   Cache(const Cache&) = delete;
-  explicit Cache(Cache&& cache) noexcept = default;
+  Cache(Cache&& cache) noexcept = default;
 
   Cache& operator=(const Cache&) = delete;
   Cache& operator=(Cache&&) = default;
@@ -42,7 +42,7 @@ class Cache {
   double GetFunctionValue(const std::size_t& id, const double& x) noexcept;
 
  private:
-  std::vector<func> funcs;
+  std::vector<Func> funcs_;
 };
 
 #endif  // __STAR_CACHE__

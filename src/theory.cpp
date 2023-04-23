@@ -14,15 +14,15 @@ using std::sqrt;
 using std::numbers::pi;  // Число е
 
 thread_local ABSL_CONST_INIT Cache cache;
-thread_local std::size_t id_G0, id_G1, id_G2, id_G3, id_G4;
+thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
-template <std::size_t parts = 36>
+template <std::size_t Parts = 36>
 double simpson(const std::function<double(const double&)>& f,
                const double& from, const double& to) {
-  const double width = (to - from) / parts;
+  const double width = (to - from) / Parts;
 
   double res = 0.0;
-  for (std::size_t step = 0; step < parts; ++step) {
+  for (std::size_t step = 0; step < Parts; ++step) {
     const double x1 = from + static_cast<double>(step) * width;
     const double x2 = from + static_cast<double>(step + 1) * width;
 
@@ -49,7 +49,8 @@ inline double C(const double& omega) {
 }
 
 inline double G0(const double& x) {
-  const double c = C(x), s = S(x);
+  const double c = C(x);
+  const double s = S(x);
   return I0 / 8.0 *
          (2.0 * x + 4.0 * x * c - 4.0 / pi * sin(pi * x * x / 2.0) +
           4.0 * x * s + 4.0 / pi * cos(pi * x * x / 2.0) + 4.0 * x * c * c -
@@ -61,7 +62,7 @@ inline double G1(const double& x) {
   return simpson<60>(
       [&x](const double& lambda) -> double {
         return sqrt(lambda * l / 2.0) *
-               cache.GetFunctionValue(id_G0, x * sqrt(2.0 / (l * lambda)));
+               cache.GetFunctionValue(id_g0, x * sqrt(2.0 / (l * lambda)));
       },
       lambda1, lambda2);
 }
@@ -69,7 +70,7 @@ inline double G1(const double& x) {
 inline double G2(const double& x) {
   return simpson<60>(
       [&x](const double& y) -> double {
-        return sigma(y) * cache.GetFunctionValue(id_G1, x + y);
+        return sigma(y) * cache.GetFunctionValue(id_g1, x + y);
       },
       -R, R);
 }
@@ -78,7 +79,7 @@ inline double G3(const double& x) {
   return simpson<60>(
       [&x](const double& beta) -> double {
         return sqrt(R0 * R0 - beta * beta) / R0 *
-               cache.GetFunctionValue(id_G2, x + beta);
+               cache.GetFunctionValue(id_g2, x + beta);
       },
       -R0, R0);
 }
@@ -87,20 +88,20 @@ inline double G4(const double& x) {
   return simpson<60>(
       [&x](const double& beta) -> double {
         return (R0 * R0 - beta * beta) / R0 *
-               cache.GetFunctionValue(id_G2, x + beta);
+               cache.GetFunctionValue(id_g2, x + beta);
       },
       -R0, R0);
 }
 
 inline double T1(const double& t) {
-  return (cache.GetFunctionValue(id_G3, V * (t + deltat - t0)) -
-          cache.GetFunctionValue(id_G3, V * (t - deltat - t0))) /
+  return (cache.GetFunctionValue(id_g3, V * (t + deltat - t0)) -
+          cache.GetFunctionValue(id_g3, V * (t - deltat - t0))) /
          V;
 }
 
 inline double T2(const double& t) {
-  return (cache.GetFunctionValue(id_G4, V * (t + deltat - t0)) -
-          cache.GetFunctionValue(id_G4, V * (t - deltat - t0))) /
+  return (cache.GetFunctionValue(id_g4, V * (t + deltat - t0)) -
+          cache.GetFunctionValue(id_g4, V * (t - deltat - t0))) /
          V;
 }
 
@@ -112,11 +113,11 @@ inline double T(const double& t) {
 
 datavec getData(const double from, const double to) {
   // const double maxT = T(t0 + 50.0 / V), minT = T(t0 - 40.0 / V);
-  id_G0 = cache.RegisterFunction(G0);
-  id_G1 = cache.RegisterFunction(G1);
-  id_G2 = cache.RegisterFunction(G2);
-  id_G3 = cache.RegisterFunction(G3);
-  id_G4 = cache.RegisterFunction(G4);
+  id_g0 = cache.RegisterFunction(G0);
+  id_g1 = cache.RegisterFunction(G1);
+  id_g2 = cache.RegisterFunction(G2);
+  id_g3 = cache.RegisterFunction(G3);
+  id_g4 = cache.RegisterFunction(G4);
 
   datavec data;
   data.reserve(static_cast<std::size_t>((to - from) / (2 * deltat)));
