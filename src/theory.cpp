@@ -2,7 +2,6 @@
 #include "cache.h"
 #include "constants.h"
 #include <cmath>
-#include <cstdio>
 #include <functional>
 #include <future>
 
@@ -18,15 +17,15 @@ using std::numbers::pi; // Число е
 thread_local Cache cache;
 thread_local std::size_t id_G0, id_G1, id_G2, id_G3, id_G4;
 
-template <std::size_t parts = 34>
+template <std::size_t parts = 36>
 double simpson(const std::function<double(const double &)> &f,
                const double &from, const double &to) {
   const double width = (to - from) / parts;
 
   double res = 0.0;
   for (std::size_t step = 0; step < parts; ++step) {
-    const double x1 = from + step * width;
-    const double x2 = from + (step + 1) * width;
+    const double x1 = from + static_cast<double>(step) * width;
+    const double x2 = from + static_cast<double>(step + 1) * width;
 
     res += (x2 - x1) / 6.0 * (f(x1) + 4.0 * f(0.5 * (x1 + x2)) + f(x2));
   }
@@ -75,7 +74,7 @@ inline double G2(const double &x) {
 inline double G3(const double &x) {
   return simpson<60>(
       [&x](const double &beta) {
-        return sqrt(R0 * R0 - beta * beta) *
+        return sqrt(R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_G2, x + beta);
       },
       -R0, R0);
@@ -116,7 +115,7 @@ datavec getData(const double from, const double to) {
   id_G3 = cache.RegisterFunction(G3);
   id_G4 = cache.RegisterFunction(G4);
 
-  thread_local datavec data;
+  datavec data;
   data.reserve(static_cast<std::size_t>((to - from) / (2 * deltat)));
 
   double t = to;
@@ -127,22 +126,18 @@ datavec getData(const double from, const double to) {
     t -= 2 * deltat;
   }
 
-  // cache.GetHitInfo();
-
   return data;
 }
 
 datavec GetData(const double &from, const double &to,
                 const std::size_t &thread_count) {
-  const double width = (to - from) / thread_count;
+  const double width = (to - from) / static_cast<double>(thread_count);
 
   std::vector<std::future<datavec>> results;
   results.reserve(thread_count);
   for (std::size_t thread = 0; thread < thread_count; ++thread) {
-    const double x1 = from + thread * width;
-    const double x2 = from + (thread + 1) * width;
-
-    fprintf(stderr, "Thread %lu: %.5e -> %.5e\n", thread + 1, x1, x2);
+    const double x1 = from + static_cast<double>(thread) * width;
+    const double x2 = from + static_cast<double>(thread + 1) * width;
 
     results.emplace_back(std::async(std::launch::async, getData, x1, x2));
   }
