@@ -23,6 +23,9 @@ jobs:
         language: [ 'cpp' ]
 
     steps:
+    - name: Install abseil lib
+      run: apt-get install -y libabsl-dev
+      
     - name: Checkout repository
       uses: actions/checkout@v3
 
