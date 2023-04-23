@@ -1,34 +1,44 @@
 #ifndef __STAR_CACHE__
 #define __STAR_CACHE__
 
+#include <absl/container/flat_hash_map.h>
 #include <functional>
-#include <string>
-#include <unordered_map>
+#include <utility>
 #include <vector>
 
 class Cache {
   using val_func = std::function<double(const double &)>;
+  using map = absl::flat_hash_map<double, double>;
 
   struct func {
-    std::unordered_map<double, double> cache;
-    std::size_t hits;
+    map cache;
     val_func f;
 
-    explicit func(const val_func &f) : cache(), hits(0), f(f) {
+    explicit func(val_func f) noexcept : cache(), f(std::move(f)) {
       cache.reserve(4'500'000);
     }
-    ~func() = default;
+    ~func() noexcept = default;
+
+    func(const func &) = default;
+    func(func &&) = default;
+
+    func &operator=(const func &) noexcept = default;
+    func &operator=(func &&fn) noexcept = default;
   };
 
 public:
-  explicit Cache() = default;
-  ~Cache() = default;
+  explicit Cache() noexcept = default;
+  ~Cache() noexcept = default;
+
+  Cache(const Cache &) = delete;
+  explicit Cache(Cache &&cache) noexcept = default;
+
+  Cache &operator=(const Cache &) = delete;
+  Cache &operator=(Cache &&) = default;
 
   std::size_t RegisterFunction(const val_func &f) noexcept;
 
   double GetFunctionValue(const std::size_t &id, const double &x) noexcept;
-
-  void GetHitInfo() const;
 
 private:
   std::vector<func> funcs;

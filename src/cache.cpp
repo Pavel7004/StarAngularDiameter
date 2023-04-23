@@ -1,8 +1,7 @@
 #include "cache.h"
-#include <cstdio>
+#include <utility>
 
-std::size_t Cache::RegisterFunction(
-    const std::function<double(const double &)> &f) noexcept {
+std::size_t Cache::RegisterFunction(const val_func &f) noexcept {
   funcs.emplace_back(f);
   return funcs.size() - 1;
 }
@@ -17,16 +16,5 @@ double Cache::GetFunctionValue(const std::size_t &id,
     fn.cache.emplace(x, val);
   }
 
-  ++fn.hits;
-
   return fn.cache.at(x);
-}
-
-void Cache::GetHitInfo() const {
-  fprintf(stderr, "Cache hits: ");
-  std::size_t i = 0;
-  for (const auto &fn : funcs) {
-    fprintf(stderr, "%lu - %lu, ", ++i, fn.cache.size());
-  }
-  fprintf(stderr, "\n");
 }
