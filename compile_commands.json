@@ -7,6 +7,8 @@
       "-Wpedantic",
       "-O3",
       "-std=c++20",
+      "-fno-exceptions",
+      "-DNOMINMAX",
       "-c",
       "-o",
       "build/main.cpp.o",
@@ -24,6 +26,8 @@
       "-Wpedantic",
       "-O3",
       "-std=c++20",
+      "-fno-exceptions",
+      "-DNOMINMAX",
       "-c",
       "-o",
       "build/theory.cpp.o",
@@ -41,6 +45,8 @@
       "-Wpedantic",
       "-O3",
       "-std=c++20",
+      "-fno-exceptions",
+      "-DNOMINMAX",
       "-c",
       "-o",
       "build/cache.cpp.o",
@@ -49,5 +55,24 @@
     "directory": "/home/pavel/Projects/StarAngularDiameter",
     "file": "/home/pavel/Projects/StarAngularDiameter/src/cache.cpp",
     "output": "/home/pavel/Projects/StarAngularDiameter/build/cache.cpp.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-O3",
+      "-std=c++20",
+      "-fno-exceptions",
+      "-DNOMINMAX",
+      "-c",
+      "-o",
+      "build/constants.cpp.o",
+      "src/constants.cpp"
+    ],
+    "directory": "/home/pavel/Projects/StarAngularDiameter",
+    "file": "/home/pavel/Projects/StarAngularDiameter/src/constants.cpp",
+    "output": "/home/pavel/Projects/StarAngularDiameter/build/constants.cpp.o"
   }
 ]
