@@ -2,13 +2,24 @@
 
 ## Зависимости
 1. gcc (g++)
+2. abseil-cpp
+
+Debian/Ubuntu:
+```
+# apt-get install libabsl-dev
+```
+
+ArchLinux:
+```
+# pacman -S abseil-cpp
+```
 
 ## Структура проекта
 
 Исходный код находится в папке `src`.
 
 ## Сборка проекта
-```bash
+```
 $ make
 ```
 
@@ -23,7 +34,7 @@ $$T_1(t_i, V, t_0, R_0) = \frac{1}{V}
 $$T_2(t_i, V, t_0, R_0) = \frac{1}{V}
 (G_4(V (t_i + \Delta t - t_0), R_0) - G_4(V (t_i - \delta t - t_0), R_0) )$$
 
-$$G_3(x, R_0) = \int_{-R_0}^{R_0}\sqrt{R_0^2-\beta^2}G_2(x+\beta) d\beta$$
+$$G_3(x, R_0) = \int_{-R_0}^{R_0}\frac{\sqrt{R_0^2-\beta^2}}{R_0}G_2(x+\beta) d\beta$$
 
 $$G_4(x, R_0) = \int_{-R_0}^{R_0}\frac{R_0^2-\beta^2}{R_0}G_2(x+\beta) d\beta$$
 
@@ -62,7 +73,4 @@ $$C(\omega) = \int_0^{\omega}\cos\frac{\pi t^2}{2} dt$$
 
 Наши графики показывают процесс «закрытия» звезды Луной ( $T(t_i, L_0, P_1, P_2, V, t_0, R_0)$ ).
 
-![График под данным из книги](./misc/1.png)
-
-![График с $L_0=2000$ и $P_1=5 * 10^11$](./misc/5e11.png)
-
+![График по данным из книги](./misc/book.png)
