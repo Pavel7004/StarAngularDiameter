@@ -4,4 +4,4 @@ set output 'out.png'
 set xlabel "x, m"
 set ylabel "N/s"
 
-plot "< cat -" u 1:2 w lp t "\nImpulces\nper second"
+plot "< cat -" u 1:2 w l t "\nImpulces\nper second"
