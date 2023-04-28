@@ -1,7 +1,7 @@
 [
   {
     "arguments": [
-      "/usr/bin/g++",
+      "/usr/bin/clang++",
       "-Wall",
       "-Wextra",
       "-Wpedantic",
@@ -20,7 +20,7 @@
   },
   {
     "arguments": [
-      "/usr/bin/g++",
+      "/usr/bin/clang++",
       "-Wall",
       "-Wextra",
       "-Wpedantic",
@@ -39,7 +39,7 @@
   },
   {
     "arguments": [
-      "/usr/bin/g++",
+      "/usr/bin/clang++",
       "-Wall",
       "-Wextra",
       "-Wpedantic",
@@ -58,7 +58,7 @@
   },
   {
     "arguments": [
-      "/usr/bin/g++",
+      "/usr/bin/clang++",
       "-Wall",
       "-Wextra",
       "-Wpedantic",
