@@ -2,17 +2,8 @@
 
 ## Зависимости
 1. gcc (g++)
-2. abseil-cpp
-
-Debian/Ubuntu:
-```
-# apt-get install libabsl-dev
-```
-
-ArchLinux:
-```
-# pacman -S abseil-cpp
-```
+2. [abseil-cpp](https://github.com/abseil/abseil-cpp)
+3. [fmtlib](https://github.com/fmtlib/fmt)
 
 ## Структура проекта
 

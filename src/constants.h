@@ -1,5 +1,5 @@
-#ifndef __STAR_CONSTANTS__
-#define __STAR_CONSTANTS__
+#ifndef STAR_CONSTANTS_
+#define STAR_CONSTANTS_
 
 // clang-format off
 
@@ -19,4 +19,4 @@ extern const double R0;       // Радиус проекции звезды на
 
 // clang-format on
 
-#endif  // __STAR_CONSTANTS__
+#endif  // STAR_CONSTANTS_

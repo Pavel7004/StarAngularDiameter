@@ -6,12 +6,13 @@ SRCS := main.cpp theory.cpp cache.cpp constants.cpp
 BUILD_DIR := ./build
 SRC_DIR := ./src
 
-CXX := g++
+CXX := clang++
 
-ABSL_FLAGS := $(shell pkg-config --cflags --libs absl_flat_hash_map)
+ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map)
+FMT_FLAGS := $(shell pkg-config --cflags --libs-only-l fmt)
 
 CFLAGS := -Wall -Wextra -Wpedantic -O3
-CXXFLAGS := $(CFLAGS) -std=c++20 -fno-exceptions $(ABSL_FLAGS)
+CXXFLAGS := $(CFLAGS) -std=c++20 -fno-exceptions $(ABSL_FLAGS) $(FMT_FLAGS)
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 

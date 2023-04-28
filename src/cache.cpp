@@ -1,5 +1,9 @@
 #include "cache.h"
 
+Cache::Func::Func(val_func f) noexcept : f(std::move(f)) {
+  cache.reserve(4'500'000);
+}
+
 std::size_t Cache::RegisterFunction(const val_func& f) noexcept {
   funcs_.emplace_back(f);
   return funcs_.size() - 1;

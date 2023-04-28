@@ -1,5 +1,5 @@
-#ifndef __STAR_THEORY__
-#define __STAR_THEORY__
+#ifndef STAR_THEORY_
+#define STAR_THEORY_
 
 #include <vector>
 
@@ -8,4 +8,4 @@ using datavec = std::vector<std::pair<double, double>>;
 datavec GetData(const double& from, const double& to,
                 const std::size_t& thread_count);
 
-#endif  // __STAR_THEORY__
+#endif  // STAR_THEORY_

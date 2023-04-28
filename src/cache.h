@@ -1,5 +1,5 @@
-#ifndef __STAR_CACHE__
-#define __STAR_CACHE__
+#ifndef STAR_CACHE_
+#define STAR_CACHE_
 
 #include <absl/container/flat_hash_map.h>
 #include <functional>
@@ -14,9 +14,7 @@ class Cache {
     map cache;
     val_func f;
 
-    explicit Func(val_func f) noexcept : f(std::move(f)) {
-      cache.reserve(4'500'000);
-    }
+    explicit Func(val_func f) noexcept;
 
     ~Func() noexcept = default;
 
@@ -32,7 +30,7 @@ class Cache {
   ~Cache() noexcept = default;
 
   Cache(const Cache&) = delete;
-  Cache(Cache&& cache) noexcept = default;
+  Cache(Cache&& cache) = default;
 
   Cache& operator=(const Cache&) = delete;
   Cache& operator=(Cache&&) = default;
@@ -45,4 +43,4 @@ class Cache {
   std::vector<Func> funcs_;
 };
 
-#endif  // __STAR_CACHE__
+#endif  // STAR_CACHE_

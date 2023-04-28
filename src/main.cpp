@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/color.h>
 #include <thread>
 #include "constants.h"
 #include "theory.h"
@@ -10,7 +10,7 @@ int main() {
   }
 
   for (const auto& [x, y] : GetData(0, tN, proc_count)) {
-    printf("%.15e %.15e\n", x, y);
+    fmt::print("{:.15e} {:.15e}\n", x, y);
   }
 
   return EXIT_SUCCESS;
