@@ -16,7 +16,7 @@ using std::numbers::pi;  // Число е
 thread_local ABSL_CONST_INIT Cache cache;
 thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
-template <std::size_t Parts = 36>
+template <std::size_t Parts = 56>
 double simpson(const std::function<double(const double&)>& f,
                const double& from, const double& to) {
   const double width = (to - from) / Parts;
@@ -59,7 +59,7 @@ inline double G0(const double& x) {
 }
 
 inline double G1(const double& x) {
-  return simpson<60>(
+  return simpson<86>(
       [&x](const double& lambda) -> double {
         return sqrt(lambda * l / 2.0) *
                cache.GetFunctionValue(id_g0, x * sqrt(2.0 / (l * lambda)));
@@ -68,7 +68,7 @@ inline double G1(const double& x) {
 }
 
 inline double G2(const double& x) {
-  return simpson<60>(
+  return simpson<86>(
       [&x](const double& y) -> double {
         return sigma(y) * cache.GetFunctionValue(id_g1, x + y);
       },
@@ -76,7 +76,7 @@ inline double G2(const double& x) {
 }
 
 inline double G3(const double& x) {
-  return simpson<60>(
+  return simpson<86>(
       [&x](const double& beta) -> double {
         return sqrt(R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_g2, x + beta);
@@ -85,7 +85,7 @@ inline double G3(const double& x) {
 }
 
 inline double G4(const double& x) {
-  return simpson<60>(
+  return simpson<86>(
       [&x](const double& beta) -> double {
         return (R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_g2, x + beta);
@@ -125,7 +125,7 @@ datavec getData(const double from, const double to) {
   double t = to;
   while (t > from) {
     // data.emplace_back(V * (t0 - t), (T(t) - minT) / (maxT - minT));
-    data.emplace_back(V * (t0 - t), T(t));
+    data.emplace_back((tN - t) * 1000, T(t));
 
     t -= 2 * deltat;
   }
