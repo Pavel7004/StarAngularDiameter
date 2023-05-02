@@ -11,7 +11,7 @@ int main() {
   auto model = GetData(0, tN, proc_count);
 
   for (const auto& [x, y] : model) {
-    fmt::print("{:.15e} {:.15e}\n", x, y);
+    fmt::print("{:.15e},{:.15e}\n", x, y);
   }
 
   return EXIT_SUCCESS;
