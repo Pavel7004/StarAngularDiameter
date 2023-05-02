@@ -1,7 +1,7 @@
 EXEC_NAME := star
 DATA_FILE := data.txt
 
-SRCS := main.cpp theory.cpp cache.cpp constants.cpp data.cpp
+SRCS := main.cpp theory.cpp cache.cpp constants.cpp data.cpp matrix.cpp
 
 BUILD_DIR := ./build
 SRC_DIR := ./src
@@ -12,7 +12,7 @@ ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map)
 FMT_FLAGS := $(shell pkg-config --cflags --libs-only-l fmt)
 
 CFLAGS := -Wall -Wextra -Wpedantic -O3
-CXXFLAGS := $(CFLAGS) -std=c++20 -fno-exceptions
+CXXFLAGS := $(CFLAGS) -std=c++2b -fno-exceptions
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
