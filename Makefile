@@ -8,11 +8,11 @@ SRC_DIR := ./src
 
 CXX := clang++
 
-ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map)
+ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map absl_strings)
 FMT_FLAGS := $(shell pkg-config --cflags --libs-only-l fmt)
 
 CFLAGS := -Wall -Wextra -Wpedantic -O3
-CXXFLAGS := $(CFLAGS) -std=c++2b -fno-exceptions
+CXXFLAGS := $(CFLAGS) -std=c++2b -fno-exceptions -Wno-pre-c++2b-compat
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 

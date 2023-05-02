@@ -8,6 +8,7 @@
       "-O3",
       "-std=c++2b",
       "-fno-exceptions",
+      "-Wno-pre-c++2b-compat",
       "-c",
       "-o",
       "build/main.cpp.o",
@@ -26,6 +27,7 @@
       "-O3",
       "-std=c++2b",
       "-fno-exceptions",
+      "-Wno-pre-c++2b-compat",
       "-c",
       "-o",
       "build/theory.cpp.o",
@@ -44,6 +46,7 @@
       "-O3",
       "-std=c++2b",
       "-fno-exceptions",
+      "-Wno-pre-c++2b-compat",
       "-c",
       "-o",
       "build/cache.cpp.o",
@@ -62,6 +65,7 @@
       "-O3",
       "-std=c++2b",
       "-fno-exceptions",
+      "-Wno-pre-c++2b-compat",
       "-c",
       "-o",
       "build/constants.cpp.o",
@@ -80,6 +84,7 @@
       "-O3",
       "-std=c++2b",
       "-fno-exceptions",
+      "-Wno-pre-c++2b-compat",
       "-c",
       "-o",
       "build/data.cpp.o",
@@ -88,5 +93,24 @@
     "directory": "/home/pavel/Projects/StarAngularDiameter",
     "file": "/home/pavel/Projects/StarAngularDiameter/src/data.cpp",
     "output": "/home/pavel/Projects/StarAngularDiameter/build/data.cpp.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-O3",
+      "-std=c++2b",
+      "-fno-exceptions",
+      "-Wno-pre-c++2b-compat",
+      "-c",
+      "-o",
+      "build/matrix.cpp.o",
+      "src/matrix.cpp"
+    ],
+    "directory": "/home/pavel/Projects/StarAngularDiameter",
+    "file": "/home/pavel/Projects/StarAngularDiameter/src/matrix.cpp",
+    "output": "/home/pavel/Projects/StarAngularDiameter/build/matrix.cpp.o"
   }
 ]
