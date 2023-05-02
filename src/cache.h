@@ -3,7 +3,6 @@
 
 #include <absl/container/flat_hash_map.h>
 #include <functional>
-#include <utility>
 #include <vector>
 
 class Cache {
@@ -11,7 +10,7 @@ class Cache {
   using map = absl::flat_hash_map<double, double>;
 
   struct Func {
-    map cache;
+    mutable map cache;
     val_func f;
 
     explicit Func(val_func f) noexcept;
@@ -30,14 +29,15 @@ class Cache {
   ~Cache() noexcept = default;
 
   Cache(const Cache&) = delete;
-  Cache(Cache&& cache) = default;
+  Cache(Cache&& cache) noexcept = default;
 
   Cache& operator=(const Cache&) = delete;
-  Cache& operator=(Cache&&) = default;
+  Cache& operator=(Cache&&) noexcept = default;
 
   std::size_t RegisterFunction(const val_func& f) noexcept;
 
-  double GetFunctionValue(const std::size_t& id, const double& x) noexcept;
+  [[nodiscard]] double GetFunctionValue(const std::size_t& id,
+                                        const double& x) const noexcept;
 
  private:
   std::vector<Func> funcs_;
