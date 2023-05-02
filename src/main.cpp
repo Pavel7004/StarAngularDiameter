@@ -5,7 +5,7 @@
 #include "theory.h"
 
 int main() {
-  std::size_t proc_count = std::thread::hardware_concurrency();
+  auto proc_count = std::thread::hardware_concurrency();
 
   auto data = ReadData("data.csv");
   auto model = GetData(0, tN, proc_count);

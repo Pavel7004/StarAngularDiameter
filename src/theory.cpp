@@ -13,7 +13,7 @@ using std::sin;
 using std::sqrt;
 using std::numbers::pi;  // Число е
 
-thread_local constinit Cache cache;
+thread_local Cache cache;
 thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
 template <std::size_t Parts = 56>
