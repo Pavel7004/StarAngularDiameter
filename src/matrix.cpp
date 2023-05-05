@@ -21,7 +21,7 @@ Matrix Matrix::Cholecky() const noexcept {
 
   for (std::size_t i = 0; i < height_; ++i) {
     for (std::size_t j = 0; j <= i; ++j) {
-      float sum = 0;
+      value_type sum = 0;
       for (std::size_t k = 0; k < j; ++k)
         sum += l[i, k] * l[j, k];
       if (i == j)
