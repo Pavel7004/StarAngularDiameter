@@ -21,7 +21,7 @@ all: $(BUILD_DIR) $(EXEC_NAME)
 
 .PHONY: plot
 plot: $(BUILD_DIR) $(EXEC_NAME) $(DATA_FILE)
-	gnuplot -c graph.gp < $(DATA_FILE) 
+	gnuplot -c graph.gp
 
 .PHONY: clean
 clean:

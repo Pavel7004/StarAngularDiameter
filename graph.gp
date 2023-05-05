@@ -5,5 +5,5 @@ set datafile separator ","
 set xlabel "t, ms"
 set ylabel "N/s"
 
-plot "data.csv" u 1:2 w l t "Collected data", \
-     "< cat -" u 1:2 w l t "\nImpulces\nper second"
+plot "data.txt" u 2:4 w l t "Collected data", \
+     "data.txt" u 2:3 w l t "\nImpulces\nper second"
