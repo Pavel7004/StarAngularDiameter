@@ -1,6 +1,5 @@
 #include <fmt/core.h>
 #include <unistd.h>
-#include <cstddef>
 #include <thread>
 #include "constants.h"
 #include "data.h"
