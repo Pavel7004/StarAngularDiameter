@@ -6,7 +6,7 @@ SRCS := main.cpp cache.cpp constants.cpp data.cpp theory.cpp matrix.cpp
 BUILD_DIR := ./build
 SRC_DIR := ./src
 
-CXX := clang++
+CXX := g++
 
 ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map absl_strings)
 FMT_FLAGS := $(shell pkg-config --cflags --libs-only-l fmt)
