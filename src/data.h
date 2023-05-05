@@ -4,6 +4,6 @@
 #include <string>
 #include "datavec.h"
 
-datavec ReadData(const std::string& path);
+DataArray ReadData(const std::string& path);
 
 #endif  // STAR_DATA_

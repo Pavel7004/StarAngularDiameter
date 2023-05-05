@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <string_view>
+#include "datavec.h"
 
 namespace {
 double svtod(const std::string_view& sv) {
@@ -14,13 +15,14 @@ double svtod(const std::string_view& sv) {
 }
 };  // namespace
 
-datavec ReadData(const std::string& path) {
+DataArray ReadData(const std::string& path) {
   if (path.substr(path.find('.') + 1) != "csv") {
     fmt::print(stderr, "Data file is not csv. Path = {}\n", path);
     std::exit(EXIT_FAILURE);
   }
 
-  datavec res;
+  std::vector<double> res_t;
+  std::vector<double> res_data;
 
   std::string line;
   std::ifstream f(path);
@@ -31,9 +33,14 @@ datavec ReadData(const std::string& path) {
       continue;
     }
 
-    res.emplace_back(svtod(data[0]), svtod(data[1]));
+    res_t.emplace_back((svtod(data[0]) * 1e-3));
+    res_data.emplace_back(svtod(data[1]));
   }
   f.close();
 
-  return res;
+  DataArray ret;
+  ret.t = {res_t.data(), res_t.size()};
+  ret.N_data = {res_data.data(), res_data.size()};
+
+  return ret;
 }

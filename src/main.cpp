@@ -1,17 +1,22 @@
 #include <fmt/core.h>
+#include <unistd.h>
+#include <cstddef>
 #include <thread>
 #include "constants.h"
 #include "data.h"
 #include "theory.h"
 
 int main() {
+  nice(31);
   auto proc_count = std::thread::hardware_concurrency();
 
   auto data = ReadData("data.csv");
-  auto model = GetData(0, tN, proc_count);
+  GetModelData(data, proc_count);
+  GetCordsData(data);
 
-  for (const auto& [x, y] : model) {
-    fmt::print("{:.15e},{:.15e}\n", x, y);
+  for (std::size_t i = 0; i < data.t.size(); ++i) {
+    fmt::print("{:.15e},{:.15e},{:.15e},{:.15e}\n", data.t[i], data.x[i],
+               data.N_model[i], data.N_data[i]);
   }
 
   return EXIT_SUCCESS;

@@ -3,8 +3,10 @@
 #include <functional>
 #include <future>
 #include <numbers>
+#include <span>
 #include "cache.h"
 #include "constants.h"
+#include "datavec.h"
 
 namespace {
 
@@ -109,57 +111,58 @@ inline double T(const double& t) {
   return P1 * T1(t) + P2 * T2(t) + L0;
 }
 
-}  // namespace
-
-datavec getData(const double from, const double to) {
-  // const double maxT = T(t0 + 50.0 / V), minT = T(t0 - 40.0 / V);
+template <typename TT>
+std::vector<double> getModelData(std::span<TT> data) {
   id_g0 = cache.RegisterFunction(G0);
   id_g1 = cache.RegisterFunction(G1);
   id_g2 = cache.RegisterFunction(G2);
   id_g3 = cache.RegisterFunction(G3);
   id_g4 = cache.RegisterFunction(G4);
 
-  datavec data;
-  data.reserve(static_cast<std::size_t>((to - from) / (2 * deltat)));
+  std::vector<double> model;
+  model.reserve(data.size());
 
-  double t = to;
-  while (t > from) {
-    // data.emplace_back(V * (t0 - t), (T(t) - minT) / (maxT - minT));
-    data.emplace_back((tN - t) * 1000, T(t));
-
-    t -= 2 * deltat;
+  for (const auto& t : data) {
+    model.emplace_back(T(t));
   }
 
-  return data;
+  return model;
 }
 
-datavec GetData(const double& from, const double& to,
-                const std::size_t& thread_count) {
-  const double width = (to - from) / static_cast<double>(thread_count);
+}  // namespace
 
-  std::vector<std::future<datavec>> results;
-  results.reserve(thread_count);
-  for (std::size_t thread = 0; thread < thread_count; ++thread) {
-    const double x1 = from + static_cast<double>(thread) * width;
-    const double x2 = from + static_cast<double>(thread + 1) * width;
+void GetModelData(DataArray& data, const std::size_t& thread_count) {
+  const auto width = data.t.size() / thread_count;
 
-    results.emplace_back(std::async(std::launch::async, getData, x1, x2));
+  double* begin = std::begin(data.t);
+  double* end = begin + width + (data.t.size() % thread_count);
+  std::vector<std::future<std::vector<double>>> results(thread_count);
+  for (auto& res : results) {
+    std::span s(begin, end);
+
+    res = std::async(std::launch::async, [s]() { return getModelData(s); });
+
+    begin = end;
+    end = begin + width;
   }
 
-  datavec ret = results[0].get();
-  std::reverse(ret.begin(), ret.end());
-  ret.reserve(ret.size() * thread_count);
+  auto ret = results[0].get();
+  ret.reserve(data.t.size());
   results.erase(results.begin());
 
   for (auto& res : results) {
-    datavec tmp = res.get();
+    auto tmp = res.get();
 
-    ret.insert(ret.end(), tmp.rbegin(), tmp.rend());
+    ret.insert(ret.end(), tmp.begin(), tmp.end());
   }
 
   std::stable_sort(ret.begin(), ret.end(), [](auto& left, auto& right) -> bool {
-    return left.first < right.first;
+    return left < right;
   });
 
-  return ret;
+  data.N_model = {ret.data(), ret.size()};
+}
+
+void GetCordsData(DataArray& data) {
+  data.x = V * (t0 - data.t);
 }

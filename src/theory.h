@@ -3,7 +3,7 @@
 
 #include "datavec.h"
 
-datavec GetData(const double& from, const double& to,
-                const std::size_t& thread_count);
+void GetModelData(DataArray& data, const std::size_t& thread_count);
+void GetCordsData(DataArray& data);
 
 #endif  // STAR_THEORY_

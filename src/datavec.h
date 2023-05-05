@@ -1,8 +1,13 @@
 #ifndef STAR_DATAVEC_
 #define STAR_DATAVEC_
 
-#include <vector>
+#include <valarray>
 
-using datavec = std::vector<std::pair<double, double>>;
+struct DataArray {
+  std::valarray<double> t;
+  std::valarray<double> x;
+  std::valarray<double> N_model;
+  std::valarray<double> N_data;
+};
 
-#endif // STAR_DATAVEC_
+#endif  // STAR_DATAVEC_
