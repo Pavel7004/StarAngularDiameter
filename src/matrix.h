@@ -7,12 +7,16 @@ class Matrix {
   using value_type = double;
 
  public:
-  explicit constexpr Matrix(const std::size_t& height,
-                            const std::size_t& width) noexcept;
+  explicit Matrix(const std::size_t& height, const std::size_t& width) noexcept;
   ~Matrix() noexcept = default;
 
   value_type& operator[](const std::size_t& idx_x,
                          const std::size_t& idx_y) noexcept;
+
+  value_type const& operator[](const std::size_t& idx_x,
+                               const std::size_t& idx_y) const noexcept;
+
+  [[nodiscard]] Matrix Cholecky() const noexcept;
 
  private:
   std::size_t height_;
