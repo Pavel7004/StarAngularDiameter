@@ -1,7 +1,7 @@
 # StarAngularDiameter
 
 ## Зависимости
-1. gcc (g++)
+1. clang (clang++)
 2. [abseil-cpp](https://github.com/abseil/abseil-cpp)
 3. [fmtlib](https://github.com/fmtlib/fmt)
 
@@ -12,6 +12,12 @@
 ## Сборка проекта
 ```
 $ make
+```
+
+## Построение графика
+
+```
+$ make plot
 ```
 
 ## Используемые формулы (все взяты из книги Черепащука А.М.)
