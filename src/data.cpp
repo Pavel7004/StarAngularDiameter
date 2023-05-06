@@ -1,14 +1,16 @@
 #include "data.h"
+
 #include <absl/strings/str_split.h>
 #include <fmt/core.h>
 #include <charconv>
 #include <fstream>
 #include <string>
 #include <string_view>
+
 #include "datavec.h"
 
 namespace {
-double svtod(const std::string_view& sv) {
+double svtod(const absl::string_view& sv) {
   double res;
   std::from_chars(sv.data(), sv.data() + sv.size(), res);
   return res;
@@ -27,7 +29,7 @@ DataArray ReadData(const std::string& path) {
   std::string line;
   std::ifstream f(path);
   while (std::getline(f, line)) {
-    std::vector<std::string_view> data = absl::StrSplit(line, ',');
+    std::vector<absl::string_view> data = absl::StrSplit(line, ',');
     if (data.size() < 2) {
       fmt::print(stderr, "Data file corrupted. Data size = {}\n", data.size());
       continue;
