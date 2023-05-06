@@ -4,6 +4,7 @@
 1. clang (clang++)
 2. [abseil-cpp](https://github.com/abseil/abseil-cpp)
 3. [fmtlib](https://github.com/fmtlib/fmt)
+4. gnuplot
 
 ## Структура проекта
 
