@@ -1,9 +1,12 @@
 #include "theory.h"
+
+#include <algorithm>
 #include <cmath>
-#include <functional>
 #include <future>
 #include <numbers>
 #include <span>
+#include <vector>
+
 #include "cache.h"
 #include "constants.h"
 #include "datavec.h"
@@ -18,9 +21,8 @@ using std::numbers::pi;  // Число е
 thread_local Cache cache;
 thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
-template <std::size_t Parts = 56>
-double simpson(const std::function<double(const double&)>& f,
-               const double& from, const double& to) {
+template <std::size_t Parts = 10>
+double simpson(auto&& f, const double& from, const double& to) {
   const double width = (to - from) / Parts;
 
   double res = 0.0;
@@ -39,13 +41,13 @@ inline double sigma(const double& y) {
 }
 
 inline double S(const double& omega) {
-  return simpson(
+  return simpson<40>(
       [](const double& t) -> double { return sin(pi * t * t / 2.0); }, 0.0,
       omega);
 }
 
 inline double C(const double& omega) {
-  return simpson(
+  return simpson<40>(
       [](const double& t) -> double { return cos(pi * t * t / 2.0); }, 0.0,
       omega);
 }
@@ -61,7 +63,7 @@ inline double G0(const double& x) {
 }
 
 inline double G1(const double& x) {
-  return simpson<86>(
+  return simpson(
       [&x](const double& lambda) -> double {
         return sqrt(lambda * l / 2.0) *
                cache.GetFunctionValue(id_g0, x * sqrt(2.0 / (l * lambda)));
@@ -70,7 +72,7 @@ inline double G1(const double& x) {
 }
 
 inline double G2(const double& x) {
-  return simpson<86>(
+  return simpson(
       [&x](const double& y) -> double {
         return sigma(y) * cache.GetFunctionValue(id_g1, x + y);
       },
@@ -78,7 +80,7 @@ inline double G2(const double& x) {
 }
 
 inline double G3(const double& x) {
-  return simpson<86>(
+  return simpson(
       [&x](const double& beta) -> double {
         return sqrt(R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_g2, x + beta);
@@ -87,7 +89,7 @@ inline double G3(const double& x) {
 }
 
 inline double G4(const double& x) {
-  return simpson<86>(
+  return simpson(
       [&x](const double& beta) -> double {
         return (R0 * R0 - beta * beta) / R0 *
                cache.GetFunctionValue(id_g2, x + beta);
@@ -134,8 +136,8 @@ std::vector<double> getModelData(std::span<TT> data) {
 void GetModelData(DataArray& data, const std::size_t& thread_count) {
   const auto width = data.t.size() / thread_count;
 
-  double* begin = std::begin(data.t);
-  double* end = begin + width + (data.t.size() % thread_count);
+  auto begin = data.t.begin();
+  auto end = begin + width + (data.t.size() % thread_count);
   std::vector<std::future<std::vector<double>>> results(thread_count);
   for (auto& res : results) {
     std::span s(begin, end);
@@ -146,23 +148,23 @@ void GetModelData(DataArray& data, const std::size_t& thread_count) {
     end = begin + width;
   }
 
-  auto ret = results[0].get();
-  ret.reserve(data.t.size());
+  data.N_model = results[0].get();
+  data.N_model.reserve(data.t.size());
   results.erase(results.begin());
 
   for (auto& res : results) {
     auto tmp = res.get();
 
-    ret.insert(ret.end(), tmp.begin(), tmp.end());
+    data.N_model.insert(data.N_model.end(), tmp.begin(), tmp.end());
   }
 
-  std::stable_sort(ret.begin(), ret.end(), [](auto& left, auto& right) -> bool {
-    return left < right;
-  });
-
-  data.N_model = {ret.data(), ret.size()};
+  std::reverse(data.N_model.begin(), data.N_model.end());
 }
 
 void GetCordsData(DataArray& data) {
-  data.x = V * (t0 - data.t);
+  data.x.reserve(data.t.size());
+
+  for (const auto& t : data.t) {
+    data.x.emplace_back(V * (t - t0));
+  }
 }
