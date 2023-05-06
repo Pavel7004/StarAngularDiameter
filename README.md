@@ -6,19 +6,27 @@
 3. [fmtlib](https://github.com/fmtlib/fmt)
 4. gnuplot
 
+``` bash
+# For Debian/Ubuntu
+apt install libfmt-dev libabsl-dev
+
+# For ArchLinux
+pacman -S abseil-cpp fmt
+```
+
 ## Структура проекта
 
 Исходный код находится в папке `src`.
 
 ## Сборка проекта
-```
-$ make
+``` bash
+make
 ```
 
 ## Построение графика
 
-```
-$ make plot
+``` bash
+make plot
 ```
 
 ## Используемые формулы (все взяты из книги Черепащука А.М.)
