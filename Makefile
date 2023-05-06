@@ -6,13 +6,13 @@ SRCS := main.cpp cache.cpp constants.cpp data.cpp theory.cpp matrix.cpp
 BUILD_DIR := ./build
 SRC_DIR := ./src
 
-CXX := g++
+CXX := clang++
 
 ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map absl_strings)
 FMT_FLAGS := $(shell pkg-config --cflags --libs-only-l fmt)
 
 CFLAGS := -Wall -Wextra -Wpedantic -O3
-CXXFLAGS := $(CFLAGS) -std=c++2b -fno-exceptions -Wno-pre-c++2b-compat
+CXXFLAGS := $(CFLAGS) -std=c++20 -fno-exceptions
 
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
