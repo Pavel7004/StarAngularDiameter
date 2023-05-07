@@ -41,9 +41,9 @@ DataArray ReadData(const std::string& path) {
   f.close();
 
   return {
-      .t = res_t,
+      .t = {res_t.data(), res_t.size()},
       .x = {},
       .N_model = {},
-      .N_data = res_data,
+      .N_data = {res_data.data(), res_data.size()},
   };
 }
