@@ -133,38 +133,44 @@ std::vector<double> getModelData(std::span<TT> data) {
 
 }  // namespace
 
-void GetModelData(DataArray& data, const std::size_t& thread_count) {
-  const auto width = data.t.size() / thread_count;
+void GetModelData(DataArray& data, std::size_t thread_count) {
+  thread_count -= 1;
 
-  auto begin = data.t.begin();
-  auto end = begin + width + (data.t.size() % thread_count);
+  const auto width = (thread_count != 0) ? data.t.size() / thread_count : 0;
+  const auto parent_work =
+      (thread_count != 0) ? data.t.size() % thread_count : data.t.size();
+
+  double* begin = std::begin(data.t);
+  double* end = begin;
   std::vector<std::future<std::vector<double>>> results(thread_count);
   for (auto& res : results) {
-    std::span s(begin, end);
-
-    res = std::async(std::launch::async, [s]() { return getModelData(s); });
-
     begin = end;
     end = begin + width;
-  }
 
-  data.N_model = results[0].get();
-  data.N_model.reserve(data.t.size());
-  results.erase(results.begin());
+    std::span s(begin, end);
+    res = std::async(std::launch::async, [s]() { return getModelData(s); });
+  }
+  begin = end;
+  end = begin + parent_work;
+  std::span s(begin, end);
+
+  std::vector<double> model;
+  model.reserve(data.t.size());
 
   for (auto& res : results) {
     auto tmp = res.get();
 
-    data.N_model.insert(data.N_model.end(), tmp.begin(), tmp.end());
+    model.insert(model.end(), tmp.begin(), tmp.end());
   }
 
-  std::reverse(data.N_model.begin(), data.N_model.end());
+  auto par_res = getModelData(s);
+  model.insert(model.end(), par_res.begin(), par_res.end());
+
+  std::reverse(model.begin(), model.end());
+
+  data.N_model = {model.data(), model.size()};
 }
 
 void GetCordsData(DataArray& data) {
-  data.x.reserve(data.t.size());
-
-  for (const auto& t : data.t) {
-    data.x.emplace_back(V * (t - t0));
-  }
+  data.x = V * (data.t - t0);
 }
