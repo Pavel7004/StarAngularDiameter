@@ -13,8 +13,7 @@ extern const double P2;       // --//--
 extern const double L0;       // Фон неба
 extern const double deltat;   // Шаг данных t (с)
 extern const double V;        // Скорость центра диска луны (м/с)
-extern const double t0;       // Время пересечения центра диска луны (с)
-extern const double tN;       // Время наблюдений (с)
+extern double t0;             // Время пересечения центра диска луны (с)
 extern const double R0;       // Радиус проекции звезды на плоскость видимого диска луны (м)
 
 // clang-format on
