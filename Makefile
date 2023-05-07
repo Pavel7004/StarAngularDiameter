@@ -1,7 +1,7 @@
 EXEC_NAME := star
 DATA_FILE := data.txt
 
-SRCS := main.cpp cache.cpp constants.cpp data.cpp theory.cpp matrix.cpp
+SRCS := main.cpp cache.cpp constants.cpp data.cpp theory.cpp matrix.cpp data_stat.cpp
 
 BUILD_DIR := ./build
 SRC_DIR := ./src
