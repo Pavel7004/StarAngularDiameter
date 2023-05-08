@@ -57,6 +57,8 @@ $$G_0(x) = \frac{I_0}{8} (2x + 4xC(x) - \frac{4}{\pi}\sin\frac{x^2\pi}{2} +
 $$S(\omega) = \int_0^{\omega}\sin\frac{\pi t^2}{2} dt$$
 
 $$C(\omega) = \int_0^{\omega}\cos\frac{\pi t^2}{2} dt$$
+$$P_1 = B_0 2(1-m)$$
+$$P_2 = B_0\frac{m}{2}\frac{\pi}{R_0}$$
 
 Значения интегралов вычисляются методом Симпсона.
 

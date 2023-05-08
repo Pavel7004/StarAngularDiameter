@@ -21,7 +21,7 @@ using std::numbers::pi;  // Число е
 thread_local Cache cache;
 thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
-template <std::size_t Parts = 10>
+template <std::size_t Parts = 15>
 double simpson(auto&& f, const double& from, const double& to) {
   const double width = (to - from) / Parts;
 
@@ -36,18 +36,14 @@ double simpson(auto&& f, const double& from, const double& to) {
   return res;
 }
 
-inline double sigma(const double& y) {
-  return 2.0 * sqrt(R * R - y * y);
-}
-
 inline double S(const double& omega) {
-  return simpson<40>(
+  return simpson<130>(
       [](const double& t) -> double { return sin(pi * t * t / 2.0); }, 0.0,
       omega);
 }
 
 inline double C(const double& omega) {
-  return simpson<40>(
+  return simpson<130>(
       [](const double& t) -> double { return cos(pi * t * t / 2.0); }, 0.0,
       omega);
 }
@@ -69,6 +65,10 @@ inline double G1(const double& x) {
                cache.GetFunctionValue(id_g0, x * sqrt(2.0 / (l * lambda)));
       },
       lambda1, lambda2);
+}
+
+inline double sigma(const double& y) {
+  return 2.0 * sqrt(R * R - y * y);
 }
 
 inline double G2(const double& x) {
@@ -109,8 +109,16 @@ inline double T2(const double& t) {
          V;
 }
 
+inline double P1() {
+  return B0 * 2 * (1 - m);
+}
+
+inline double P2() {
+  return B0 * (m / 2.0) * (pi / R0);
+}
+
 inline double T(const double& t) {
-  return P1 * T1(t) + P2 * T2(t) + L0;
+  return P1() * T1(t) + P2() * T2(t) + L0;
 }
 
 template <typename TT>
@@ -153,6 +161,7 @@ void GetModelData(DataArray& data, std::size_t thread_count) {
   begin = end;
   end = begin + parent_work;
   std::span s(begin, end);
+  auto par_res = getModelData(s);
 
   std::vector<double> model;
   model.reserve(data.t.size());
@@ -162,8 +171,6 @@ void GetModelData(DataArray& data, std::size_t thread_count) {
 
     model.insert(model.end(), tmp.begin(), tmp.end());
   }
-
-  auto par_res = getModelData(s);
   model.insert(model.end(), par_res.begin(), par_res.end());
 
   std::reverse(model.begin(), model.end());
