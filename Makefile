@@ -8,7 +8,7 @@ SRC_DIR := ./src
 
 CXX := clang++
 
-ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map absl_strings)
+ABSL_FLAGS := $(shell pkg-config --cflags --libs-only-l absl_flat_hash_map absl_strings absl_random_random)
 FMT_FLAGS := $(shell pkg-config --cflags --libs-only-l fmt)
 
 CFLAGS := -Wall -Wextra -Wpedantic -O3

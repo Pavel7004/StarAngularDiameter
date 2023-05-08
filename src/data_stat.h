@@ -4,5 +4,6 @@
 #include "datavec.h"
 
 double ComputeSqErr(const DataArray& data);
+void ApplyMonteKarlo(DataArray& data, std::size_t passes, std::size_t threads);
 
 #endif  // DATA_STAT_H_
