@@ -16,8 +16,10 @@
 
 namespace {
 struct DataSet {
-  DataSet(double t0, double L0, double B0, double m, double err)
+  explicit DataSet(double t0, double L0, double B0, double m, double err)
       : t0(t0), L0(L0), B0(B0), m(m), err(err) {}
+
+  ~DataSet() = default;
 
   DataSet(const DataSet&) = default;
   DataSet(DataSet&&) = default;
@@ -33,7 +35,7 @@ struct DataSet {
 };
 
 DataSet generateInputData(const DataSet& set, absl::BitGenRef gen) {
-  constexpr double kRandRange = 0.02;
+  constexpr double kRandRange = 0.2;
 
   const double t0_range = set.t0 * kRandRange;
   const double l0_range = set.L0 * kRandRange;
@@ -47,12 +49,13 @@ DataSet generateInputData(const DataSet& set, absl::BitGenRef gen) {
 }
 
 DataSet monteCarloWorker(DataArray& data, const DataSet in_data,
-                         std::size_t passes, std::size_t threads) {
+                         std::size_t passes, const std::size_t& threads) {
   absl::BitGen gen;
 
   DataSet best_sample(0, 0, 0, 0, 1e20);
+  DataSet sample(0, 0, 0, 0, 0);
   while (passes > 0) {
-    auto sample = generateInputData(in_data, gen);
+    sample = generateInputData(in_data, gen);
 
     t0 = sample.t0;
     L0 = sample.L0;
@@ -77,9 +80,9 @@ DataSet monteCarloWorker(DataArray& data, const DataSet in_data,
 
 double ComputeSqErr(const DataArray& data) {
   return std::sqrt(
-             (std::abs(data.N_model * data.N_model - data.N_data * data.N_data))
-                 .sum()) /
-         static_cast<double>(data.N_model.size());
+      (std::abs(data.N_model * data.N_model - data.N_data * data.N_data))
+          .sum() /
+      static_cast<double>(data.N_model.size()));
 }
 
 void ApplyMonteKarlo(DataArray& data, std::size_t passes, std::size_t threads) {
@@ -94,7 +97,7 @@ void ApplyMonteKarlo(DataArray& data, std::size_t passes, std::size_t threads) {
   std::vector<std::future<DataSet>> results(rand_threads);
   for (auto& res : results) {
     res = std::async(std::launch::async, monteCarloWorker, std::ref(data), best,
-                     passes, calc_threads);
+                     passes, std::cref(calc_threads));
   }
 
   auto in_data = monteCarloWorker(data, best, passes, calc_threads);
