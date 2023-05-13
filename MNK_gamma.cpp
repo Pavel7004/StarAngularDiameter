@@ -28,15 +28,15 @@ void print(vector<double>vec)
 
 vector<vector<double>> operator* (vector<vector<double>> A, vector<vector<double>> B)
 {
-    vector<vector<double>> AB(A.size(), vector<double>(A.size()));
-
-    for (int i = 0; i < A.size(); ++i)
+    vector<vector<double>> AB(A.size(), vector<double>(B[0].size()));
+   //print(AB);
+    for (int a = 0; a < A.size(); ++a)
     {
-        for (int j = 0; j < B[0].size(); ++j)
+        for (int b = 0; b < B[0].size(); ++b)
         {
             for (int k = 0; k < A[0].size(); ++k)
             {
-                AB[i][j] += A[i][k] * B[k][j];
+                AB[a][b] += A[a][k] * B[k][b];
             }
         }
     }
@@ -97,15 +97,16 @@ vector<vector<double>> Cholecky(vector<vector<double>>A)
 }
 vector<vector<double>> Trans(vector<vector<double>>A)
 {
-    vector<vector<double>>tA = A;
-    for (int i = 0; i < tA.size(); ++i)
+    vector<vector<double>>tA(A[0].size(),vector<double>(A.size()));
+    for (int i = 0; i < A.size(); ++i)
     {
-        for (int j = 0; j <= i; ++j)
-        {
-            swap(tA[i][j], tA[j][i]);
-        }
+       for (int j = 0; j < A[0].size(); ++j)
+       {
+           tA[j][i] = A[i][j];
+       }
     }
     return tA;
+
 }
 vector<vector<double>> r(vector<vector<double>>A)
 {
@@ -185,15 +186,20 @@ double sr(vector < pair<double, double>>data,vector<double>B)
 int main()
 {
     //freopen("matrix.txt", "r", stdin);
-    vector < pair<double, double>>data = { {0,0},{1. / 9.,0.0535},{0.2324,0},{1,-1} };
+    vector < pair<double, double>>data = { {-1,14},{ 0,4},{1,-2},{2,-34},{3,-122},{4,-296},{5,-586} };
     vector<double>B = { 1,1,1,1 };
-   // print(Cholecky({ {4,12,-16}, {12,37,-43},{-16,-43,98} }));
-   for (int i = 0; i < 6; ++i)
-    {
-        print(B);
-        B = B-r(Trans(Jacobian(data,B))*Jacobian(data,B))*Trans(Jacobian(data,B))*rR(data,B);
-    }
-    
+    // print(Cholecky({ {4,12,-16}, {12,37,-43},{-16,-43,98} }));
+    //cout<<Jacobian(data, B).size()<<" "<<Jacobian(data,B)[0].size()<<endl;
+    // print(Trans(Jacobian(data, B))* Jacobian(data, B));
+    for (int i = 0; i < 6; ++i)
+     {
+         print(B);
+         //print(Jacobian(data, B));
+         B = B-r(Trans(Jacobian(data,B))*Jacobian(data,B))*Trans(Jacobian(data,B))*rR(data,B);
+     }
+    //vector<vector<double>>A = { {1,1,1 },{2,2,2} },C= { {1, 2}, { 1,2 }, { 1,2 } };
+    //print(A * C);
+  // print(Trans({ {1,1,1},{2,2,2} }));
 
    // print(r({ {81,-45,45},{-45,50,-15},{45,-15,38} }));
 }
