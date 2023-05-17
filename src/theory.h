@@ -3,6 +3,8 @@
 
 #include "datavec.h"
 
+double T(const double& t);
+
 void GetModelData(DataArray& data, std::size_t thread_count);
 void GetCordsData(DataArray& data);
 

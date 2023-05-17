@@ -18,7 +18,7 @@ using std::sin;
 using std::sqrt;
 using std::numbers::pi;  // Число е
 
-thread_local Cache cache;
+thread_local constinit Cache* cache = nullptr;
 thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
 template <std::size_t Parts = 15>
@@ -62,7 +62,7 @@ inline double G1(const double& x) {
   return simpson(
       [&x](const double& lambda) -> double {
         return sqrt(lambda * l / 2.0) *
-               cache.GetFunctionValue(id_g0, x * sqrt(2.0 / (l * lambda)));
+               cache->GetFunctionValue(id_g0, x * sqrt(2.0 / (l * lambda)));
       },
       lambda1, lambda2);
 }
@@ -74,7 +74,7 @@ inline double sigma(const double& y) {
 inline double G2(const double& x) {
   return simpson(
       [&x](const double& y) -> double {
-        return sigma(y) * cache.GetFunctionValue(id_g1, x + y);
+        return sigma(y) * cache->GetFunctionValue(id_g1, x + y);
       },
       -R, R);
 }
@@ -83,7 +83,7 @@ inline double G3(const double& x) {
   return simpson(
       [&x](const double& beta) -> double {
         return sqrt(R0 * R0 - beta * beta) / R0 *
-               cache.GetFunctionValue(id_g2, x + beta);
+               cache->GetFunctionValue(id_g2, x + beta);
       },
       -R0, R0);
 }
@@ -92,20 +92,20 @@ inline double G4(const double& x) {
   return simpson(
       [&x](const double& beta) -> double {
         return (R0 * R0 - beta * beta) / R0 *
-               cache.GetFunctionValue(id_g2, x + beta);
+               cache->GetFunctionValue(id_g2, x + beta);
       },
       -R0, R0);
 }
 
 inline double T1(const double& t) {
-  return (cache.GetFunctionValue(id_g3, V * (t + deltat - t0)) -
-          cache.GetFunctionValue(id_g3, V * (t - deltat - t0))) /
+  return (cache->GetFunctionValue(id_g3, V * (t + deltat - t0)) -
+          cache->GetFunctionValue(id_g3, V * (t - deltat - t0))) /
          V;
 }
 
 inline double T2(const double& t) {
-  return (cache.GetFunctionValue(id_g4, V * (t + deltat - t0)) -
-          cache.GetFunctionValue(id_g4, V * (t - deltat - t0))) /
+  return (cache->GetFunctionValue(id_g4, V * (t + deltat - t0)) -
+          cache->GetFunctionValue(id_g4, V * (t - deltat - t0))) /
          V;
 }
 
@@ -117,17 +117,15 @@ inline double P2() {
   return B0 * (m / 2.0) * (pi / R0);
 }
 
-inline double T(const double& t) {
-  return P1() * T1(t) + P2() * T2(t) + L0;
-}
-
 template <typename TT>
 std::vector<double> getModelData(std::span<TT> data) {
-  id_g0 = cache.RegisterFunction(G0);
-  id_g1 = cache.RegisterFunction(G1);
-  id_g2 = cache.RegisterFunction(G2);
-  id_g3 = cache.RegisterFunction(G3);
-  id_g4 = cache.RegisterFunction(G4);
+  cache = new Cache();
+
+  id_g0 = cache->RegisterFunction(G0);
+  id_g1 = cache->RegisterFunction(G1);
+  id_g2 = cache->RegisterFunction(G2);
+  id_g3 = cache->RegisterFunction(G3);
+  id_g4 = cache->RegisterFunction(G4);
 
   std::vector<double> model;
   model.reserve(data.size());
@@ -136,10 +134,16 @@ std::vector<double> getModelData(std::span<TT> data) {
     model.emplace_back(T(t));
   }
 
+  delete cache;
+
   return model;
 }
 
 }  // namespace
+
+double T(const double& t) {
+  return P1() * T1(t) + P2() * T2(t) + L0;
+}
 
 void GetModelData(DataArray& data, std::size_t thread_count) {
   thread_count -= 1;
