@@ -9,7 +9,7 @@ const double deltat = 2e-3;  // Шаг данных t (с)
 const double V = 726.0;  // Скорость центра диска луны (м/с)
 const double m = 0.6;  // Коэфицент потемнения в линейном законе
 
-thread_local double t0 = 208.3e-3;  // Время пересечения центра диска луны (с)
-thread_local double L0 = 2127.2;   // Фон неба
-thread_local double B0 = 2.94e11;  // Яркость в центре диска луны
-thread_local double R0 = 2.8;  // Радиус проекции звезды на плоскость видимого диска луны (м)
+thread_local double t0 = 241.199e-3;  // Время пересечения центра диска луны (с)
+thread_local double L0 = 2488.3;   // Фон неба
+thread_local double B0 = 2.56e11;  // Яркость в центре диска луны
+thread_local double R0 = 2.5;  // Радиус проекции звезды на плоскость видимого диска луны (м)
