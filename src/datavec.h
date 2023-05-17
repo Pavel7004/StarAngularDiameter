@@ -14,9 +14,10 @@ struct DataArray {
 
   ~DataArray() = default;
 
-  DataArray(const DataArray&) = delete;
+  DataArray(const DataArray&) = default;
+  DataArray& operator=(const DataArray&) = default;
+
   DataArray(DataArray&&) = default;
-  DataArray& operator=(const DataArray&) = delete;
   DataArray& operator=(DataArray&&) = default;
 
   std::valarray<double> t;
