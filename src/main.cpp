@@ -2,9 +2,11 @@
 #include <unistd.h>
 #include <cstdio>
 #include <thread>
+
 #include "constants.h"
 #include "data.h"
 #include "data_stat.h"
+#include "gauss_newton.h"
 #include "theory.h"
 
 int main() {
@@ -12,9 +14,11 @@ int main() {
   auto proc_count = std::thread::hardware_concurrency();
 
   auto data = ReadData("data.csv");
-  GetCordsData(data);
   GetModelData(data, proc_count);
-  ApplyMonteKarlo(data, 30, proc_count / 2);
+  ApplyMonteKarlo(data, 600, proc_count);
+  //ApplyGaussNewton(data, 4);
+
+  GetCordsData(data);
   auto err = ComputeSqErr(data);
 
   for (std::size_t i = 0; i < data.t.size(); ++i) {
@@ -24,7 +28,7 @@ int main() {
   fmt::print(
       stderr,
       "Error: {:.15e}\nt0 = {:.15e}\nL0 = {:.15e}\nB0 = {:.15e}\nm = {:.15e}\n",
-      err, t0, L0, B0, m);
+      err, t0, L0, B0, R0);
 
   return EXIT_SUCCESS;
 }
