@@ -11,7 +11,7 @@ std::size_t Cache::RegisterFunction(const val_func& f) noexcept {
 
 [[nodiscard]] double Cache::GetFunctionValue(const std::size_t& id,
                                              const double& x) const noexcept {
-  const Func& fn = funcs_[id];
+  const auto& fn = funcs_.at(id);
 
   if (!fn.cache.contains(x)) {
     const double val = fn.f(x);
