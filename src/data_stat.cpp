@@ -90,12 +90,11 @@ double ComputeSqErr(const DataArray& data) {
 }
 
 void ApplyMonteKarlo(DataArray& data, std::size_t passes, std::size_t threads) {
+  // NOTE: number of threads to create beside main one
   const std::size_t rand_threads = 3;
   const std::size_t calc_threads = threads / (rand_threads + 1);
 
-  auto err = ComputeSqErr(data);
-
-  DataSet best(t0, L0, B0, R0, err);
+  DataSet best(t0, L0, B0, R0, ComputeSqErr(data));
   passes = passes / (rand_threads + 1);
 
   std::vector<std::future<DataSet>> results(rand_threads);
@@ -104,16 +103,16 @@ void ApplyMonteKarlo(DataArray& data, std::size_t passes, std::size_t threads) {
                      std::cref(calc_threads));
   }
 
-  auto in_data = monteCarloWorker(data, best, passes, calc_threads);
-  if (in_data.err < best.err) {
-    best = std::move(in_data);
+  auto res_sample = monteCarloWorker(data, best, passes, calc_threads);
+  if (res_sample.err < best.err) {
+    best = std::move(res_sample);
   }
 
   for (auto& res : results) {
-    in_data = res.get();
+    res_sample = res.get();
 
-    if (in_data.err < best.err) {
-      best = std::move(in_data);
+    if (res_sample.err < best.err) {
+      best = std::move(res_sample);
     }
   }
 
