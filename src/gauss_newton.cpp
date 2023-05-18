@@ -45,21 +45,22 @@ double rr(std::size_t x, DataArray const& data,
 template <std::size_t N>
 std::array<double, N> df(double x, std::array<double, N> const& B,
                          DataArray const& data) {
-  constexpr auto rrN = [](std::size_t x, DataArray const& data,
-                          std::array<double, N> const& B) -> double {
+  const auto rR = [&](std::array<double, N> const& B) -> double {
     return rr<N>(x, data, B);
   };
 
   constexpr double dt = 100;
-  const double err = rrN(x, data, B);
-  double dx =
-      (rrN(x, data, {B[0] + B[0] / dt, B[1], B[2], B[3]}) - err) / (B[0] / dt);
-  double dy =
-      (rrN(x, data, {B[0], B[1] + B[1] / dt, B[2], B[3]}) - err) / (B[1] / dt);
-  double dz =
-      (rrN(x, data, {B[0], B[1], B[2] + B[2] / dt, B[3]}) - err) / (B[2] / dt);
-  double dk =
-      (rrN(x, data, {B[0], B[1], B[2], B[3] + B[3] / dt}) - err) / (B[3] / dt);
+  const double err = rR(B);
+
+  const double dx =
+      (rR({B[0] + B[0] / dt, B[1], B[2], B[3]}) - err) / (B[0] / dt);
+  const double dy =
+      (rR({B[0], B[1] + B[1] / dt, B[2], B[3]}) - err) / (B[1] / dt);
+  const double dz =
+      (rR({B[0], B[1], B[2] + B[2] / dt, B[3]}) - err) / (B[2] / dt);
+  const double dk =
+      (rR({B[0], B[1], B[2], B[3] + B[3] / dt}) - err) / (B[3] / dt);
+
   return {dx, dy, dz, dk};
 }
 
@@ -92,10 +93,12 @@ std::array<double, N> rR(DataArray const& data,
 template <std::size_t N>
 double sr(DataArray const& data, std::array<double, N> const& B) {
   double R = 0;
+
   for (std::size_t i = 0; i < data.t.size(); ++i) {
     R += fabs(data.N_data[i] * data.N_data[i] -
               f(data.t[i], B) * f(data.t[i], B));
   }
+
   return R;
 }
 
@@ -122,7 +125,7 @@ void printMtx(Matrix<N, M> const& mx) {
 }  // namespace
 
 void ApplyGaussNewton(DataArray const& data, std::size_t iterations) {
-  constexpr std::size_t kDataSetSize = 210;
+  constexpr std::size_t kDataSetSize = 200;
 
   std::array<double, 4> B = {t0, B0, L0, R0};
 
