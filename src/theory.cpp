@@ -21,6 +21,19 @@ using std::numbers::pi;  // Число е
 thread_local constinit Cache* cache = nullptr;
 thread_local std::size_t id_g0, id_g1, id_g2, id_g3, id_g4;
 
+thread_local double t0;  // Время пересечения центра диска луны (с)
+thread_local double L0;  // Фон неба
+thread_local double B0;  // Яркость в центре диска луны
+thread_local double
+    R0;  // Радиус проекции звезды на плоскость видимого диска луны (м)
+
+void SetGlobalParams(DataSet const& set) {
+  t0 = set.t0_;
+  L0 = set.l0_;
+  B0 = set.b0_;
+  R0 = set.r0_;
+}
+
 template <std::size_t Parts = 15>
 double simpson(auto&& f, const double& from, const double& to) {
   const double width = (to - from) / Parts;
@@ -110,7 +123,7 @@ inline double T2(const double& t) {
 }
 
 inline double P1() {
-  return B0 * 2 * (1 - m);
+  return B0 * 2 * (1 - m) / R0;
 }
 
 inline double P2() {
@@ -118,7 +131,7 @@ inline double P2() {
 }
 
 template <typename TT>
-std::vector<double> getModelData(std::span<TT> data) {
+std::vector<double> getModelData(std::span<TT> data, DataSet const& params) {
   cache = new Cache();
 
   id_g0 = cache->RegisterFunction(G0);
@@ -127,6 +140,7 @@ std::vector<double> getModelData(std::span<TT> data) {
   id_g3 = cache->RegisterFunction(G3);
   id_g4 = cache->RegisterFunction(G4);
 
+  SetGlobalParams(params);
   std::vector<double> model;
   model.reserve(data.size());
 
@@ -145,7 +159,19 @@ double T(const double& t) {
   return P1() * T1(t) + P2() * T2(t) + L0;
 }
 
-void GetModelData(DataArray& data, std::size_t thread_count) {
+void NewCache() {
+  if (cache == nullptr) {
+    cache = new Cache();
+  }
+}
+
+void DeleteCache() {
+  delete cache;
+  cache = nullptr;
+}
+
+void GetModelData(DataArray& data, DataSet const& params,
+                  std::size_t thread_count) {
   thread_count -= 1;
 
   const auto width = (thread_count != 0) ? data.t.size() / thread_count : 0;
@@ -160,12 +186,13 @@ void GetModelData(DataArray& data, std::size_t thread_count) {
     end = begin + width;
 
     std::span s(begin, end);
-    res = std::async(std::launch::async, [s]() { return getModelData(s); });
+    res = std::async(std::launch::async,
+                     [&s, &params]() { return getModelData(s, params); });
   }
   begin = end;
   end = begin + parent_work;
   std::span s(begin, end);
-  auto par_res = getModelData(s);
+  auto par_res = getModelData(s, params);
 
   std::vector<double> model;
   model.reserve(data.t.size());
@@ -182,6 +209,6 @@ void GetModelData(DataArray& data, std::size_t thread_count) {
   data.N_model = {model.data(), model.size()};
 }
 
-void GetCordsData(DataArray& data) {
-  data.x = V * (data.t - t0);
+void GetCordsData(DataArray& data, DataSet const& set) {
+  data.x = V * (data.t - set.t0_);
 }
