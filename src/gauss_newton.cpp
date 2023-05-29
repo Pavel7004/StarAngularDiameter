@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <vector>
 
+#include "cache.h"
 #include "constants.h"
 #include "datavec.h"
 #include "matrix.h"
@@ -16,7 +17,7 @@ template <std::size_t N>
 Matrix<N, N> r(Matrix<N, N> const& A) {
   auto rA = Matrix<N, N>::IdentityMatrix();
 
-  auto l = A.Cholecky();
+  const auto l = A.Cholecky();
   for (std::size_t i = 0; i < N; ++i) {
     rA(i, 0) *= (1.0 / l(i, i));
     for (std::size_t j = i + 1; j < N; ++j) {
@@ -39,27 +40,27 @@ double f(double x, std::array<double, N> const& B) {
 template <std::size_t N>
 double rr(std::size_t x, DataArray const& data,
           std::array<double, N> const& B) {
-  return f(data.t[x], B) - data.t[x];
+  return f(data.t[x], B) - data.N_data[x];
 }
 
 template <std::size_t N>
 std::array<double, N> df(double x, std::array<double, N> const& B,
                          DataArray const& data) {
-  const auto rR = [&](std::array<double, N> const& B) -> double {
+  const auto rn = [&](std::array<double, N> const& B) -> double {
     return rr<N>(x, data, B);
   };
 
   constexpr double dt = 100;
-  const double err = rR(B);
+  const double err = rn(B);
 
   const double dx =
-      (rR({B[0] + B[0] / dt, B[1], B[2], B[3]}) - err) / (B[0] / dt);
+      (rn({B[0] + B[0] / dt, B[1], B[2], B[3]}) - err) / (B[0] / dt);
   const double dy =
-      (rR({B[0], B[1] + B[1] / dt, B[2], B[3]}) - err) / (B[1] / dt);
+      (rn({B[0], B[1] + B[1] / dt, B[2], B[3]}) - err) / (B[1] / dt);
   const double dz =
-      (rR({B[0], B[1], B[2] + B[2] / dt, B[3]}) - err) / (B[2] / dt);
+      (rn({B[0], B[1], B[2] + B[2] / dt, B[3]}) - err) / (B[2] / dt);
   const double dk =
-      (rR({B[0], B[1], B[2], B[3] + B[3] / dt}) - err) / (B[3] / dt);
+      (rn({B[0], B[1], B[2], B[3] + B[3] / dt}) - err) / (B[3] / dt);
 
   return {dx, dy, dz, dk};
 }
@@ -69,7 +70,7 @@ Matrix<N, M> Jacobian(DataArray const& data, std::array<double, M> const& B) {
   Matrix<N, M> jb;
 
   for (std::size_t i = 0; i < N; ++i) {
-    auto row = df(i, B, data);
+    const auto row = df(i, B, data);
     for (std::size_t j = 0; j < M; ++j) {
       jb(i, j) = row[j];
     }
@@ -107,7 +108,7 @@ std::array<T, N> operator-(std::array<T, N> const& left,
                            std::array<T, N> const& right) {
   std::array<T, N> res;
   for (std::size_t i = 0; i < N; ++i) {
-    res[i] = left[i] + right[i];
+    res[i] = left[i] - right[i];
   }
   return res;
 }
@@ -129,12 +130,16 @@ void ApplyGaussNewton(DataArray const& data, std::size_t iterations) {
 
   std::array<double, 4> B = {t0, B0, L0, R0};
 
+  NewCache();
+
   for (std::size_t i = 0; i < iterations; ++i) {
     fmt::print(stderr, "{:.3e} {:.3e} {:.3e} {:.3e}\n", B[0], B[1], B[2], B[3]);
 
-    auto jacob = Jacobian<kDataSetSize, 4>(data, B);
-    auto jacob_tr = jacob.Transpose();
+    const auto jacob = Jacobian<kDataSetSize, 4>(data, B);
+    const auto jacob_tr = jacob.Transpose();
 
     B = B - r(jacob_tr * jacob) * jacob_tr * rR<kDataSetSize>(data, B);
   }
+
+  DeleteCache();
 }
