@@ -4,10 +4,13 @@
 #include <absl/random/random.h>
 #include <fmt/core.h>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
+#include <functional>
 #include <future>
+#include <queue>
 #include <vector>
 
 #include "constants.h"
@@ -15,34 +18,8 @@
 #include "theory.h"
 
 namespace {
-struct DataSet {
-  explicit DataSet(double t0, double L0, double B0, double R0, double err)
-      : t0_(t0), l0_(L0), b0_(B0), r0_(R0), err(err) {}
-
-  ~DataSet() = default;
-
-  DataSet(const DataSet&) = default;
-  DataSet(DataSet&&) = default;
-  DataSet& operator=(const DataSet&) = default;
-  DataSet& operator=(DataSet&&) = default;
-
-  double t0_;
-  double l0_;
-  double b0_;
-  double r0_;
-
-  double err;
-
-  inline void SetGlobalParams() const noexcept {
-    t0 = t0_;
-    L0 = l0_;
-    B0 = b0_;
-    R0 = r0_;
-  }
-};
-
-DataSet generateInputData(const DataSet& set, absl::BitGenRef gen) {
-  constexpr double kRandRange = 0.2;
+DataSet generateInputData(DataSet const& set, absl::BitGenRef gen) {
+  constexpr double kRandRange = 0.10;
 
   const double t0_range = set.t0_ * kRandRange;
   const double l0_range = set.l0_ * kRandRange;
@@ -55,67 +32,78 @@ DataSet generateInputData(const DataSet& set, absl::BitGenRef gen) {
                  set.r0_ + absl::Uniform(gen, -r0_range, r0_range), 1e20);
 }
 
-DataSet monteCarloWorker(DataArray data, const DataSet in_data,
-                         std::size_t passes, const std::size_t& threads) {
+std::vector<DataSet> monteCarloWorker(DataArray data, const DataSet in_data,
+                                      const std::size_t passes,
+                                      const std::size_t threads) {
   absl::BitGen gen;
 
-  DataSet best_sample(0, 0, 0, 0, 1e20);
-  DataSet sample(0, 0, 0, 0, 0);
-  while (passes > 0) {
-    sample = generateInputData(in_data, gen);
+  std::size_t fixed_size = (passes < 100) ? passes : 100;
+  std::vector<DataSet> results_heap;
+  results_heap.reserve(fixed_size + 1);
 
-    sample.SetGlobalParams();
-    GetModelData(data, threads);
+  for (std::size_t i = 0; i < passes; ++i) {
+    auto sample = generateInputData(in_data, gen);
+
+    GetModelData(data, sample, threads);
     sample.err = ComputeSqErr(data);
 
-    // fmt::print(stderr, "Got error: {:.10e}\n", sample.err);
+    results_heap.push_back(std::move(sample));
+    std::push_heap(results_heap.begin(), results_heap.end(), std::greater<>());
 
-    if (sample.err < best_sample.err) {
-      best_sample = std::move(sample);
+    if (results_heap.size() > fixed_size) {
+      results_heap.pop_back();
     }
-
-    --passes;
   }
 
-  return best_sample;
+  return results_heap;
 }
 
 }  // namespace
 
-double ComputeSqErr(const DataArray& data) {
+double ComputeSqErr(DataArray const& data) {
   return std::sqrt(
       (std::abs(data.N_model * data.N_model - data.N_data * data.N_data))
           .sum() /
       static_cast<double>(data.N_model.size()));
 }
 
-void ApplyMonteKarlo(DataArray& data, std::size_t passes, std::size_t threads) {
+std::vector<DataSet> ApplyMonteKarlo(DataArray& data, DataSet const& params,
+                                     std::size_t passes,
+                                     const std::size_t threads) {
   // NOTE: number of threads to create beside main one
-  const std::size_t rand_threads = 3;
-  const std::size_t calc_threads = threads / (rand_threads + 1);
+  const std::size_t rand_threads = threads - 1;
+  const std::size_t calc_threads = 1;
 
-  DataSet best(t0, L0, B0, R0, ComputeSqErr(data));
   passes = passes / (rand_threads + 1);
 
-  std::vector<std::future<DataSet>> results(rand_threads);
+  std::vector<std::future<std::vector<DataSet>>> results(rand_threads);
   for (auto& res : results) {
-    res = std::async(std::launch::async, monteCarloWorker, data, best, passes,
-                     std::cref(calc_threads));
+    res = std::async(std::launch::async, monteCarloWorker, data, params, passes,
+                     calc_threads);
   }
 
-  auto res_sample = monteCarloWorker(data, best, passes, calc_threads);
-  if (res_sample.err < best.err) {
-    best = std::move(res_sample);
-  }
-
+  auto run_data = monteCarloWorker(data, params, passes, calc_threads);
+  run_data.reserve(run_data.size() * threads + 1);
+  run_data.push_back(params);
   for (auto& res : results) {
-    res_sample = res.get();
+    auto run_sample = res.get();
 
-    if (res_sample.err < best.err) {
-      best = std::move(res_sample);
-    }
+    run_data.insert(run_data.end(), run_sample.begin(), run_sample.end());
   }
 
-  best.SetGlobalParams();
-  GetModelData(data, threads);
+  std::sort(run_data.begin(), run_data.end());
+
+  return run_data;
+}
+
+std::array<double, 2> GetValueRange(std::vector<DataSet> const& data) {
+  double min = data.at(0).r0_;
+  double max = min;
+
+  for (auto const& el : data) {
+    min = std::min(min, el.r0_);
+    max = std::max(max, el.r0_);
+  }
+
+  return {min, max};
 }
