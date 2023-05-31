@@ -19,7 +19,7 @@ int main() {
   GetModelData(data, params, 1);
   params.err = ComputeSqErr(data);
 
-  auto run_data = ApplyMonteKarlo(data, params, 3000, proc_count);
+  auto run_data = ApplyMonteKarlo(data, params, 10000, proc_count);
   params = run_data.at(0);
 
   GetModelData(data, params, 1);
