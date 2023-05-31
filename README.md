@@ -58,7 +58,7 @@ $$S(\omega) = \int_0^{\omega}\sin\frac{\pi t^2}{2} dt$$
 
 $$C(\omega) = \int_0^{\omega}\cos\frac{\pi t^2}{2} dt$$
 
-$$P_1 = B_0 2(1-m)$$
+$$P_1 = B_0 \frac{2(1-m)}{R_0}$$
 
 $$P_2 = B_0\frac{m}{2}\frac{\pi}{R_0}$$
 
